@@ -34,7 +34,7 @@ AzaleaTown_WHTApricorn:
 	getitemname STRING_BUFFER_3, WHT_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem WHT_APRICORN
+	giveitem WHT_APRICORN, 5
 	iffalse .AzaleaTown_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear AZALEATOWN_WHT_APRICORN

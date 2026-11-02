@@ -38,7 +38,7 @@ Route29_OranBerry:
 	getitemname STRING_BUFFER_3, ORAN_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem ORAN_BERRY, 2
+	giveitem ORAN_BERRY, 5
 	iffalse .Route29_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE29_ORAN_BERRY

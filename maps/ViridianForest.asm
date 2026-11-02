@@ -25,7 +25,7 @@ ViridianForest_OranBerry:
 	getitemname STRING_BUFFER_3, ORAN_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem ORAN_BERRY, 2
+	giveitem ORAN_BERRY, 5
 	iffalse ViridianForest_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear VIRIDIANFOREST_ORAN_BERRY
@@ -45,7 +45,7 @@ ViridianForest_PechaBerry:
 	getitemname STRING_BUFFER_3, PECHA_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem PECHA_BERRY, 2
+	giveitem PECHA_BERRY, 5
 	iffalse ViridianForest_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear VIRIDIANFOREST_PECHA_BERRY

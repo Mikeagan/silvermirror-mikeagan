@@ -23,7 +23,7 @@ Route35_LeppaBerry:
 	getitemname STRING_BUFFER_3, LEPPA_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem LEPPA_BERRY, 2
+	giveitem LEPPA_BERRY, 5
 	iffalse Route35_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE35_LEPPA_BERRY
@@ -43,7 +43,7 @@ Route35_GRNApricorn:
 	getitemname STRING_BUFFER_3, GRN_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem GRN_APRICORN
+	giveitem GRN_APRICORN, 5
 	iffalse Route35_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE35_GRN_APRICORN

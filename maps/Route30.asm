@@ -33,7 +33,7 @@ Route30_OranBerry:
 	getitemname STRING_BUFFER_3, ORAN_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem ORAN_BERRY, 2
+	giveitem ORAN_BERRY, 5
 	iffalse Route30_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE30_ORAN_BERRY
@@ -53,7 +53,7 @@ Route30_PechaBerry:
 	getitemname STRING_BUFFER_3, PECHA_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem PECHA_BERRY, 2
+	giveitem PECHA_BERRY, 5
 	iffalse Route30_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE30_PECHA_BERRY
@@ -73,7 +73,7 @@ Route30_PNKApricorn:
 	getitemname STRING_BUFFER_3, PNK_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem PNK_APRICORN
+	giveitem PNK_APRICORN, 5
 	iffalse Route30_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE30_PNK_APRICORN

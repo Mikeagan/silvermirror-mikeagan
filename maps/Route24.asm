@@ -29,7 +29,7 @@ Route24_LeppaBerry:
 	getitemname STRING_BUFFER_3, LEPPA_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem LEPPA_BERRY, 2
+	giveitem LEPPA_BERRY, 5
 	iffalse .Route24_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE24_LEPPA_BERRY

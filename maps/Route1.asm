@@ -24,7 +24,7 @@ Route1_OranBerry:
 	getitemname STRING_BUFFER_3, ORAN_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem ORAN_BERRY, 2
+	giveitem ORAN_BERRY, 5
 	iffalse Route1_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE1_ORAN_BERRY
@@ -44,7 +44,7 @@ Route1_BLKApricorn:
 	getitemname STRING_BUFFER_3, BLK_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem BLK_APRICORN
+	giveitem BLK_APRICORN, 5
 	iffalse Route1_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE1_BLK_APRICORN

@@ -24,7 +24,7 @@ Route46_CheriBerry:
 	getitemname STRING_BUFFER_3, CHERI_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem CHERI_BERRY, 2
+	giveitem CHERI_BERRY, 5
 	iffalse Route46_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE46_CHERI_BERRY
@@ -44,7 +44,7 @@ Route46_SitrusBerry:
 	getitemname STRING_BUFFER_3, SITRUS_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem SITRUS_BERRY, 2
+	giveitem SITRUS_BERRY, 5
 	iffalse Route46_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE46_SITRUS_BERRY
