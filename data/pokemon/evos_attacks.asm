@@ -187,7 +187,7 @@ CaterpieEvosAttacks:
 	db 0 ; no more evolutions
 	db 1, TACKLE
 	db 1, STRING_SHOT
-	db 15, BUG_BITE
+	db 9, BUG_BITE
 	db 0 ; no more level-up moves
 
 MetapodEvosAttacks:
@@ -212,7 +212,7 @@ ButterfreeEvosAttacks:
 	db 19, SUPERSONIC
 	db 22, WHIRLWIND ;HYPNOSIS
 	db 24, PSYBEAM
-	db 28, SILVER_WIND
+	db 28, BUG_BITE ;SILVER_WIND duplicate removed
 	db 30, AGILITY ;tailwind, x
 	db 34, SAFEGUARD
 	db 36, ATTRACT ;captivate, x
@@ -224,7 +224,7 @@ WeedleEvosAttacks:
 	db 0 ; no more evolutions
 	db 1, POISON_STING
 	db 1, STRING_SHOT
-	db 15, BUG_BITE
+	db 9, BUG_BITE
 	db 0 ; no more level-up moves
 
 KakunaEvosAttacks:
