@@ -55,10 +55,11 @@ MartBallsThree:
 	db -1 ; end
 
 MartBallsFive:
-	db 7 ; # items
+	db 8 ; # items
 	db POKE_BALL
 	db GREAT_BALL
 	db ULTRA_BALL
+	db MASTER_BALL
 	db ESCAPE_ROPE
 	db REPEL
 	db SUPER_REPEL
@@ -130,19 +131,22 @@ MartTMs1:
 
 ;MartCeladon4F:
 MartEvolution1:
-	db 6 ; # items
+	db 8 ; # items
 	db POKE_DOLL
 	db FIRE_STONE
 	db THUNDERSTONE
 	db WATER_STONE
 	db LEAF_STONE
+	db SUN_STONE
+	db MOON_STONE
 	db LINKING_CORD
 	db -1 ; end
 
 ;MartCeladon5F1:
 ;Mart Goldenrod4F:
 MartVitamins1:
-	db 5 ; # items
+	db 6 ; # items
+	db PP_UP
 	db HP_UP
 	db PROTEIN
 	db IRON
