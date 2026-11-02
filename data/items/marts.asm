@@ -131,7 +131,7 @@ MartTMs1:
 
 ;MartCeladon4F:
 MartEvolution1:
-	db 8 ; # items
+	db 11 ; # items
 	db POKE_DOLL
 	db FIRE_STONE
 	db THUNDERSTONE
@@ -139,6 +139,9 @@ MartEvolution1:
 	db LEAF_STONE
 	db SUN_STONE
 	db MOON_STONE
+	db DUSK_STONE
+	db METAL_COAT
+	db DRAGON_SCALE
 	db LINKING_CORD
 	db -1 ; end
 
