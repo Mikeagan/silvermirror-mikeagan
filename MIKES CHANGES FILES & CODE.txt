@@ -1,7 +1,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //CHANGE LEVEL CATERPIE & WEEDLE LEARN BUG_BITE, ADD TO BUTTERFREE
 //------------------------------------------------------------------------------------------
-C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\data\pokemon\evos_attacks.asm
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror-mikeagan\data\pokemon\evos_attacks.asm
 
 CaterpieEvosAttacks:
 	db EVOLVE_LEVEL, 7, METAPOD
@@ -40,7 +40,7 @@ WeedleEvosAttacks:
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //ADD MASTERBALL TO MART AFTER 5 GYMS
 //------------------------------------------------------------------------------------------
-C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\data\items\marts.asm
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror-mikeagan\data\items\marts.asm
 MartBallsFive:
 	db 8 ; # items 7->8
 	db POKE_BALL
@@ -81,7 +81,7 @@ MartVitamins1:
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //CHANGE PRICE OF ITEMS
 //------------------------------------------------------------------------------------------
-C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror-mikeagan\data\items\attributes.asm
 ; LEVEL_BALL 			500->1000
 ; HEAVY_BALL 			500->1000
 ; NET_BALL ; LURE_BALL 	500->1000
@@ -92,6 +92,7 @@ C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //BERRY & APRICORN TREES GIVE 5 EACH.
 //------------------------------------------------------------------------------------------
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror-mikeagan\maps\*.asm
 ; ROUTE 1
 	giveitem ORAN_BERRY, 5
 	giveitem BLK_APRICORN, 5
@@ -166,3 +167,12 @@ C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\
 	giveitem CHERI_BERRY, 5
 	giveitem SITRUS_BERRY, 5
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//BERRY & APRICORN TREES GIVE 5 EACH.
+//------------------------------------------------------------------------------------------
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror-mikeagan\maps\OaksLab.asm
+givepoke CHARMANDER, 5, ORAN_BERRY
+givepoke CYNDAQUIL, 5, ORAN_BERRY
+givepoke SQUIRTLE, 5, ORAN_BERRY
+givepoke TOTODILE, 5, ORAN_BERRY
+givepoke BULBASAUR, 5, ORAN_BERRY
+givepoke CHIKORITA, 5, ORAN_BERRY

@@ -129,7 +129,7 @@ CharmanderPokeBallScript:
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke CHARMANDER, 5
+	givepoke CHARMANDER, 5, ORAN_BERRY
 	closetext
 	setevent EVENT_GOT_A_POKEMON_FROM_OAK
 	setevent EVENT_GOT_CHARMANDER_FROM_OAK
@@ -156,7 +156,7 @@ CharmanderPokeBallScript:
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke CYNDAQUIL, 5
+	givepoke CYNDAQUIL, 5, ORAN_BERRY
 	closetext
 	setevent EVENT_GOT_A_POKEMON_FROM_OAK
 	setevent EVENT_GOT_CHARMANDER_FROM_OAK
@@ -196,7 +196,7 @@ SquirtlePokeBallScript:
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke SQUIRTLE, 5
+	givepoke SQUIRTLE, 5, ORAN_BERRY
 	closetext
 	setevent EVENT_GOT_A_POKEMON_FROM_OAK
 	setevent EVENT_GOT_SQUIRTLE_FROM_OAK
@@ -225,7 +225,7 @@ SquirtlePokeBallScript:
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke TOTODILE, 5
+	givepoke TOTODILE, 5, ORAN_BERRY
 	closetext
 	setevent EVENT_GOT_A_POKEMON_FROM_OAK
 	setevent EVENT_GOT_SQUIRTLE_FROM_OAK
@@ -265,7 +265,7 @@ BulbasaurPokeBallScript:
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke BULBASAUR, 5
+	givepoke BULBASAUR, 5, ORAN_BERRY
 	closetext
 	setevent EVENT_GOT_A_POKEMON_FROM_OAK
 	setevent EVENT_GOT_BULBASAUR_FROM_OAK
@@ -294,7 +294,7 @@ BulbasaurPokeBallScript:
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke CHIKORITA, 5
+	givepoke CHIKORITA, 5, ORAN_BERRY
 	closetext
 	setevent EVENT_GOT_A_POKEMON_FROM_OAK
 	setevent EVENT_GOT_BULBASAUR_FROM_OAK
