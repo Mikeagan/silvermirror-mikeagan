@@ -1,0 +1,168 @@
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//CHANGE LEVEL CATERPIE & WEEDLE LEARN BUG_BITE, ADD TO BUTTERFREE
+//------------------------------------------------------------------------------------------
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\data\pokemon\evos_attacks.asm
+
+CaterpieEvosAttacks:
+	db EVOLVE_LEVEL, 7, METAPOD
+	db 0 ; no more evolutions
+	db 1, TACKLE
+	db 1, STRING_SHOT
+	db 9, BUG_BITE ; 15->9
+	db 0 ; no more level-up moves
+
+ButterfreeEvosAttacks:
+	db 0 ; no more evolutions
+;	db 1, CONFUSION
+	db 1, GUST ;10, EVOLUTION_MOVE
+	db 11, CONFUSION
+	db 13, POISONPOWDER
+	db 13, STUN_SPORE
+	db 13, SLEEP_POWDER
+	db 17, SILVER_WIND
+	db 19, SUPERSONIC
+	db 22, WHIRLWIND ;HYPNOSIS
+	db 24, PSYBEAM
+	db 28, BUG_BITE ;SILVER_WIND duplicate removed
+	db 30, AGILITY ;tailwind, x
+	db 34, SAFEGUARD
+	db 36, ATTRACT ;captivate, x
+	db 40, BUG_BUZZ
+	db 0 ; no more level-up moves
+
+WeedleEvosAttacks:
+	db EVOLVE_LEVEL, 7, KAKUNA
+	db 0 ; no more evolutions
+	db 1, POISON_STING
+	db 1, STRING_SHOT
+	db 9, BUG_BITE ; 15->9
+	db 0 ; no more level-up moves
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//ADD MASTERBALL TO MART AFTER 5 GYMS
+//------------------------------------------------------------------------------------------
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\data\items\marts.asm
+MartBallsFive:
+	db 8 ; # items 7->8
+	db POKE_BALL
+	db GREAT_BALL
+	db ULTRA_BALL
+	db MASTER_BALL ;NEW ADDED
+	db ESCAPE_ROPE
+	db REPEL
+	db SUPER_REPEL
+	db MAX_REPEL
+	db -1 ; end
+	
+;MartCeladon4F:
+MartEvolution1:
+	db 8 ; # items
+	db POKE_DOLL
+	db FIRE_STONE
+	db THUNDERSTONE
+	db WATER_STONE
+	db LEAF_STONE
+	db SUN_STONE
+	db MOON_STONE
+	db LINKING_CORD
+	db -1 ; end
+
+;MartCeladon5F1:
+;Mart Goldenrod4F:
+MartVitamins1:
+	db 6 ; # items
+	db PP_UP
+	db HP_UP
+	db PROTEIN
+	db IRON
+	db CALCIUM
+	db CARBOS
+;	db PP_UP
+	db -1 ; end
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//CHANGE PRICE OF ITEMS
+//------------------------------------------------------------------------------------------
+C:\Users\micha\OneDrive\Desktop\gbc-decomps\silvermirror\
+; LEVEL_BALL 			500->1000
+; HEAVY_BALL 			500->1000
+; NET_BALL ; LURE_BALL 	500->1000
+; FAST_BALL 			500->1000
+; FRIEND_BALL 			500->1000
+; DUSK_BALL ; MOON_BALL 500->1000
+; LOVE_BALL 			500->1000
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//BERRY & APRICORN TREES GIVE 5 EACH.
+//------------------------------------------------------------------------------------------
+; ROUTE 1
+	giveitem ORAN_BERRY, 5
+	giveitem BLK_APRICORN, 5
+; VIRIDIAN FOREST
+	giveitem ORAN_BERRY, 5
+	giveitem PECHA_BERRY, 5
+; ROUTE 2
+	giveitem PNK_APRICORN, 5
+; PEWTER CITY
+	giveitem CHESTO_BERRY, 5
+	giveitem PERSIM_BERRY, 5
+	giveitem BLU_APRICORN, 5
+	giveitem WHT_APRICORN, 5
+; ROUTE 8
+	giveitem RAWST_BERRY, 5
+	giveitem YLW_APRICORN,5
+; ROUTE 11
+	giveitem CHERI_BERRY, 5
+	giveitem GRN_APRICORN, 5
+; ROUTE 16
+	giveitem SITRUS_BERRY, 5
+; FUCHSIA CITY
+	giveitem ASPEAR_BERRY, 5
+	giveitem RED_APRICORN, 5
+; ROUTE 24
+	giveitem LEPPA_BERRY, 5
+; BILLS VACKYARD
+	giveitem LUM_BERRY, 5
+; ROUTE 26
+	giveitem LEPPA_BERRY, 5
+	giveitem SITRUS_BERRY, 5
+; ROUTE 29
+	giveitem ORAN_BERRY, 5
+; ROUTE 30
+	giveitem ORAN_BERRY, 5
+	giveitem PECHA_BERRY, 5
+	giveitem PNK_APRICORN, 5
+; VIOLET CITY
+	giveitem YLW_APRICORN, 5
+; ROUTE 33
+	giveitem BLK_APRICORN, 5
+; AZALEA TOWN
+	giveitem WHT_APRICORN, 5
+; ROUTE 35
+	giveitem LEPPA_BERRY, 5
+	giveitem GRN_APRICORN, 5
+; ROUTE 36
+	giveitem RAWST_BERRY, 5
+; ROUTE 37
+	giveitem RED_APRICORN, 5
+	giveitem BLU_APRICORN, 5
+	giveitem BLK_APRICORN, 5
+; ROUTE 38
+	giveitem CHESTO_BERRY, 5
+	giveitem WHT_APRICORN, 5
+; ROUTE 39
+	giveitem ORAN_BERRY, 5
+; ROUTE 42
+	giveitem PNK_APRICORN, 5
+	giveitem GRN_APRICORN, 5
+	giveitem YLW_APRICORN, 5
+; ROUTE 43
+	giveitem PERSIM_BERRY, 5
+	giveitem BLU_APRICORN,5
+; ROUTE 44
+	giveitem ASPEAR_BERRY, 5
+	giveitem RED_APRICORN, 5
+; ROUTE 45
+	giveitem LEPPA_BERRY, 5
+	giveitem LUM_BERRY, 5
+; ROUTE 46
+	giveitem CHERI_BERRY, 5
+	giveitem SITRUS_BERRY, 5
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
