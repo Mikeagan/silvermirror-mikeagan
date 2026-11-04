@@ -88,4 +88,4 @@ DEF PHONE_CONTACT_SIZE EQU _RS
 
 ; SC: max pokegear contacts are now just NUM_PHONE_CONTACTS
 ;     due to the phone list being a bit flag now.
-;DEF CONTACT_LIST_SIZE EQU 12 ;10
+;DEF CONTACT_LIST_SIZE EQU 32 ;12 ;10
