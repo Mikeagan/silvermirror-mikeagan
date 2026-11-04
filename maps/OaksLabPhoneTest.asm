@@ -1,0 +1,2597 @@
+	object_const_def
+	const OAKSLAB_OAK
+	const OAKSLAB_BLUE
+	const OAKSLAB_POKE_BALL1
+	const OAKSLAB_POKE_BALL2
+	const OAKSLAB_POKE_BALL3
+	const OAKSLAB_POKEDEX1
+	const OAKSLAB_POKEDEX2
+
+OaksLab_MapScripts:
+	def_scene_scripts
+	scene_script OaksLabNoop1Scene,   SCENE_OAKSLAB_NOOP
+	scene_script OaksLabMeetOakScene, SCENE_OAKSLAB_MEET_OAK
+	scene_script OaksLabNoop2Scene,   SCENE_OAKSLAB_RIVAL_BATTLE
+
+	def_callbacks
+	callback MAPCALLBACK_OBJECTS, OaksLabMoveOakCallback
+
+OaksLabNoop1Scene:
+OaksLabNoop2Scene:
+	end
+
+OaksLabMoveOakCallback:
+	checkevent EVENT_BEAT_ELITE_FOUR
+	iffalse .Done
+	moveobject OAKSLAB_OAK, 4, 2
+.Done
+	endcallback
+
+OaksLabMeetOakScene:
+	applymovement PLAYER, OaksLabPlayerWalkInMovement
+	turnobject OAKSLAB_BLUE, UP
+	setscene SCENE_OAKSLAB_RIVAL_BATTLE
+;	variablesprite SPRITE_VARIABLE_1, SPRITE_GEODUDE_MOVE
+	jumptext OaksLabIntroConversationText
+
+;scripts
+OakScript:
+	faceplayer
+	checkevent EVENT_GOT_POKEDEX
+	iftrue .EvaluatePokedex
+;deliver parcel
+	checkevent EVENT_GOT_OAKS_PARCEL
+	iftrue DeliverOaksParcelScript
+;choose pokemon
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iffalse .OakWhichPokemonDoYouWant
+;rival battle
+	checkscene
+	ifequal SCENE_OAKSLAB_RIVAL_BATTLE, .OakWildPokemon
+;else
+	jumptext OaksLabPokemonAwaitText
+
+.EvaluatePokedex
+	opentext
+	checkevent EVENT_GOT_POKEBALLS_FROM_OAK
+	iffalse .OakGiveBalls
+	writetext OakLabEvaluateDexText
+	promptbutton
+	special ProfOaksPCBoot
+	writetext OakLabOakGoodbyeText
+	waitbutton
+	closetext
+	end
+
+.OakGiveBalls
+	writetext OaksLabOakGivesPokeballsText
+	promptbutton
+	writetext OaksLabGetPokeballsText
+	playsound SFX_ITEM
+	waitsfx
+	promptbutton
+	giveitem POKE_BALL, 5
+;	itemnotify
+;	promptbutton
+;	verbosegiveitem POKE_BALL, 5
+;
+	writetext OaksLabPokeballExplainationText
+	waitbutton
+	closetext
+	setevent EVENT_GOT_POKEBALLS_FROM_OAK
+	end
+
+.OakWhichPokemonDoYouWant
+	jumptext OaksLabWhichPokemonDoYouWantText
+
+.OakWildPokemon
+	jumptext OaksLabWildPokemonText
+
+OaksLabTryToLeaveScript:
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLabRivalBattleScript
+	opentext
+	writetext OaksLabDontLeaveText
+	waitbutton
+	closetext
+	applymovement PLAYER, OaksLabDontLeaveMovement
+	end
+
+
+; Fire starter
+CharmanderPokeBallScript:
+	checkevent EVENT_OAKS_LAB_OAK
+	iftrue LookAtPokeballsEarlyScript
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	turnobject OAKSLAB_OAK, DOWN
+	checkevent EVENT_JOHTO_STARTERS
+	iftrue .Cyndaquil
+
+;Charmander
+	refreshscreen
+	pokepic CHARMANDER
+	cry CHARMANDER
+	waitbutton
+	closepokepic
+	setval CHARMANDER
+	special SilentSetSeenMon
+	getmonname STRING_BUFFER_3, CHARMANDER
+	opentext
+	writetext OaksLabTakeFireStarterText
+	yesorno
+	iffalse OaksLabDidntChooseStarterScript
+	disappear OAKSLAB_POKE_BALL1
+	writetext OaksLabChoseStarterText
+	promptbutton
+	waitsfx
+	writetext OaksLabReceivedStarterText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke CHARMANDER, 5, ORAN_BERRY
+	closetext
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	setevent EVENT_GOT_CHARMANDER_FROM_OAK
+	sjump RivalTakesSquirtle
+
+.Cyndaquil
+	refreshscreen
+	pokepic CYNDAQUIL
+	cry CYNDAQUIL
+	waitbutton
+	closepokepic
+;	setval CYNDAQUIL
+;	special SilentSetSeenMon
+	getmonname STRING_BUFFER_3, CYNDAQUIL
+	opentext
+	writetext OaksLabTakeFireStarterText
+	yesorno
+	iffalse OaksLabDidntChooseStarterScript
+	disappear OAKSLAB_POKE_BALL1
+	writetext OaksLabChoseStarterText
+	promptbutton
+	waitsfx
+	writetext OaksLabReceivedStarterText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke CYNDAQUIL, 5, ORAN_BERRY
+	closetext
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	setevent EVENT_GOT_CHARMANDER_FROM_OAK
+	sjump RivalTakesSquirtle
+
+
+; Water starter
+SquirtlePokeBallScript:
+	checkevent EVENT_OAKS_LAB_OAK
+	iftrue LookAtPokeballsEarlyScript
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	turnobject OAKSLAB_OAK, DOWN
+	checkevent EVENT_JOHTO_STARTERS
+	iftrue .Totodile
+
+;Squirtle
+	refreshscreen
+	pokepic SQUIRTLE
+	cry SQUIRTLE
+	waitbutton
+	closepokepic
+	setval SQUIRTLE
+	special SilentSetSeenMon
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	getmonname STRING_BUFFER_3, SQUIRTLE
+	opentext
+	writetext OaksLabTakeWaterStarterText
+	yesorno
+	iffalse OaksLabDidntChooseStarterScript
+	disappear OAKSLAB_POKE_BALL2
+	writetext OaksLabChoseStarterText
+	promptbutton
+	waitsfx
+	writetext OaksLabReceivedStarterText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke SQUIRTLE, 5, ORAN_BERRY
+	closetext
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	setevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	sjump RivalTakesBulbasaur
+
+.Totodile
+	refreshscreen
+	pokepic TOTODILE
+	cry TOTODILE
+	waitbutton
+	closepokepic
+;	setval TOTODILE
+;	special SilentSetSeenMon
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	getmonname STRING_BUFFER_3, TOTODILE
+	opentext
+	writetext OaksLabTakeWaterStarterText
+	yesorno
+	iffalse OaksLabDidntChooseStarterScript
+	disappear OAKSLAB_POKE_BALL2
+	writetext OaksLabChoseStarterText
+	promptbutton
+	waitsfx
+	writetext OaksLabReceivedStarterText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke TOTODILE, 5, ORAN_BERRY
+	closetext
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	setevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	sjump RivalTakesBulbasaur
+
+
+; Grass starter
+BulbasaurPokeBallScript:
+	checkevent EVENT_OAKS_LAB_OAK
+	iftrue LookAtPokeballsEarlyScript
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	turnobject OAKSLAB_OAK, DOWN
+	checkevent EVENT_JOHTO_STARTERS
+	iftrue .Chikorita
+
+;Bulbasaur
+	refreshscreen
+	pokepic BULBASAUR
+	cry BULBASAUR
+	waitbutton
+	closepokepic
+	setval BULBASAUR
+	special SilentSetSeenMon
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	getmonname STRING_BUFFER_3, BULBASAUR
+	opentext
+	writetext OaksLabTakeGrassStarterText
+	yesorno
+	iffalse OaksLabDidntChooseStarterScript
+	disappear OAKSLAB_POKE_BALL3
+	writetext OaksLabChoseStarterText
+	promptbutton
+	waitsfx
+	writetext OaksLabReceivedStarterText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke BULBASAUR, 5, ORAN_BERRY
+	closetext
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	setevent EVENT_GOT_BULBASAUR_FROM_OAK
+	sjump RivalTakesCharmander
+
+.Chikorita
+	refreshscreen
+	pokepic CHIKORITA
+	cry CHIKORITA
+	waitbutton
+	closepokepic
+;	setval CHIKORITA
+;	special SilentSetSeenMon
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue OaksLastPokemonScript
+	getmonname STRING_BUFFER_3, CHIKORITA
+	opentext
+	writetext OaksLabTakeGrassStarterText
+	yesorno
+	iffalse OaksLabDidntChooseStarterScript
+	disappear OAKSLAB_POKE_BALL3
+	writetext OaksLabChoseStarterText
+	promptbutton
+	waitsfx
+	writetext OaksLabReceivedStarterText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke CHIKORITA, 5, ORAN_BERRY
+	closetext
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	setevent EVENT_GOT_BULBASAUR_FROM_OAK
+	sjump RivalTakesCharmander
+
+OaksLabDidntChooseStarterScript:
+	writetext OaksLabDidntChooseStarterText
+	waitbutton
+	closetext
+	end
+
+RivalTakesCharmander:
+	applymovement OAKSLAB_BLUE, RivalTakesCharmanderMovement
+	opentext
+	writetext OaksLabRivalTakesPokemonText
+	disappear OAKSLAB_POKE_BALL1
+	clearevent EVENT_BLUES_ROOM_CHARMANDER
+	waitbutton
+	closetext
+;	setscene SCENE_OAKSLAB_RIVAL_BATTLE
+	end
+
+RivalTakesSquirtle:
+	readvar VAR_FACING
+	ifequal UP, .LongSquirtle
+	applymovement OAKSLAB_BLUE, RivalTakesSquirtleMovementShort
+	sjump .FinishSquirtle
+.LongSquirtle
+	applymovement OAKSLAB_BLUE, RivalTakesSquirtleMovementLong
+	; fallthrough
+.FinishSquirtle
+	opentext
+	writetext OaksLabRivalTakesPokemonText
+	disappear OAKSLAB_POKE_BALL2
+	clearevent EVENT_BLUES_ROOM_SQUIRTLE
+	waitbutton
+	closetext
+;	setscene SCENE_OAKSLAB_RIVAL_BATTLE
+	end
+
+RivalTakesBulbasaur:
+	applymovement OAKSLAB_BLUE, RivalTakesBulbasaurMovement
+	opentext
+	writetext OaksLabRivalTakesPokemonText
+	disappear OAKSLAB_POKE_BALL3
+	clearevent EVENT_BLUES_ROOM_BULBASAUR
+	waitbutton
+	closetext
+;	setscene SCENE_OAKSLAB_RIVAL_BATTLE
+	end
+
+OaksLastPokemonScript:
+	jumptext OaksPokeBallText
+;	end
+
+LookAtPokeballsEarlyScript:
+	jumptext OaksLabThoseArePokeballsText
+;	end
+
+OaksLabRivalBattleScript:
+	playmusic MUSIC_RIVAL_ENCOUNTER
+	turnobject OAKSLAB_BLUE, DOWN
+	turnobject PLAYER, UP
+	opentext
+	writetext OaksLabRivalBattleChallengeText
+	waitbutton
+	closetext
+	readvar VAR_XCOORD
+	ifequal 5, .Skip
+	applymovement OAKSLAB_BLUE, OaksLabRivalStepLeftMovement
+.Skip
+	checkevent EVENT_GOT_CHARMANDER_FROM_OAK
+	iftrue .RivalBattleSquirtleScript
+	checkevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	iftrue .RivalBattleBulbasaurScript
+	applymovement OAKSLAB_BLUE, OaksLabRivalBattleCharmanderMovement
+	sjump OaksLabRivalBattleStart
+
+.RivalBattleSquirtleScript
+	applymovement OAKSLAB_BLUE, OaksLabRivalBattleSquirtleMovement
+	sjump OaksLabRivalBattleStart
+
+.RivalBattleBulbasaurScript
+	applymovement OAKSLAB_BLUE, OaksLabRivalBattleBulbasaurMovement
+	; fallthrough
+OaksLabRivalBattleStart:
+	setlasttalked OAKSLAB_BLUE
+	winlosstext OaksLabRivalBattleWinText, OaksLabRivalBattleLossText
+	checkevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	iftrue .RivalBulbasaur
+	checkevent EVENT_GOT_BULBASAUR_FROM_OAK
+	iftrue .RivalCharmander
+	loadtrainer RIVAL1, RIVAL1_1_SQUIRTLE
+	loadmem VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	reloadmap
+	sjump .FinishRival
+.RivalBulbasaur:
+	loadtrainer RIVAL1, RIVAL1_1_BULBASAUR
+	loadmem VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	reloadmap
+	sjump .FinishRival
+.RivalCharmander:
+	loadtrainer RIVAL1, RIVAL1_1_CHARMANDER
+	loadmem VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	reloadmap
+	sjump .FinishRival
+
+.FinishRival:
+	opentext
+	writetext OaksLabAfterRivalBattleText
+	waitbutton
+	closetext
+	playmusic MUSIC_RIVAL_ENCOUNTER
+	scall OaksLabRivalGoesAroundScript
+	applymovement OAKSLAB_BLUE, OaksLabRivalLeavesMovement
+;	pause 15
+	playsound SFX_EXIT_BUILDING
+	disappear OAKSLAB_BLUE
+	setscene SCENE_OAKSLAB_NOOP
+	setmapscene PALLET_TOWN, SCENE_PALLETTOWN_NOOP
+	setevent EVENT_PLAYERS_HOUSE_1F_NEIGHBOR
+	clearevent EVENT_BLUES_HOUSE_NEIGHBOR
+	special HealParty
+	waitsfx
+	special RestartMapMusic
+	end
+
+OaksLabRivalGoesAroundScript:
+	readvar VAR_XCOORD
+	ifequal 5, .Left
+	applymovement OAKSLAB_BLUE, OaksLabRivalStepRightMovement
+	end
+.Left
+	applymovement OAKSLAB_BLUE, OaksLabRivalStepLeftMovement
+	end
+
+DeliverOaksParcelScript:
+	moveobject OAKSLAB_BLUE, 4, 7
+	opentext
+	writetext OaksLabHowIsMyPokemonText
+	playsound SFX_ITEM
+	takeitem OAKS_PARCEL
+	waitsfx
+	promptbutton
+	writetext OaksLabParcelThanksText
+	waitbutton
+	closetext
+	turnobject OAKSLAB_OAK, DOWN
+	playmusic MUSIC_RIVAL_ENCOUNTER
+	opentext
+	writetext OaksLabRivalGrampsText
+	waitbutton
+	closetext
+	scall OaksLabRivalParcelEntranceScript
+	opentext
+	writetext OaksLabWhatDidYouCallMeForText
+	waitbutton
+	closetext
+	special RestartMapMusic
+	opentext
+	writetext OaksLabOakHaveRequestText
+	promptbutton
+	writetext OaksLabGotPokedexText
+	playsound SFX_ITEM
+	setflag ENGINE_POKEDEX
+	disappear OAKSLAB_POKEDEX1
+	disappear OAKSLAB_POKEDEX2
+	waitsfx
+	promptbutton
+	writetext OaksLabOaksDreamGivePagerText
+;	writetext OaksLabOaksDreamText
+;	promptbutton
+;	writetext OaksLabOakGivePagerText
+	promptbutton
+	stringtotext .pagercardname, MEM_BUFFER_1
+	scall .JumpstdReceiveItem
+	setflag ENGINE_PAGER_CARD
+	writetext GotPagerCardText
+	promptbutton
+	writetext OaksLabOakExplainsPagerText
+	waitbutton
+;	closetext
+;	opentext
+	setlasttalked OAKSLAB_BLUE
+	faceplayer
+	writetext OaksLabRivalLeavesAfterPokedexText
+	waitbutton
+	closetext
+	playmusic MUSIC_RIVAL_ENCOUNTER
+	applymovement OAKSLAB_BLUE, OaksLabRivalLeavesMovement
+	pause 15
+	disappear OAKSLAB_BLUE
+	setevent EVENT_GOT_POKEDEX
+;	setflag ENGINE_MOBILE_SYSTEM
+	setmapscene VIRIDIAN_CITY, SCENE_VIRIDIANCITY_MAP_CARD
+	setevent EVENT_VIRIDIAN_CITY_COFFEE_GRAMPS
+	clearevent EVENT_VIRIDIAN_CITY_CATCHING_GRAMPS
+	setmapscene ROUTE_22, SCENE_ROUTE22_RIVAL_1
+	setscene SCENE_OAKSLAB_NOOP
+	special RestartMapMusic
+	setlasttalked OAKSLAB_OAK
+	faceplayer
+	opentext
+	writetext OaksLabOakGivePhoneNumberText
+	waitbutton
+;	closetext
+	addcellnum PHONE_OAK
+	;TESTING GET ALL NUMBERS
+	addcellnum PHONE_BILL
+	addcellnum PHONE_SCHOOLBOY_JACK
+	addcellnum PHONE_POKEFAN_BEVERLY
+	addcellnum PHONE_SAILOR_HUEY
+	addcellnum PHONE_YOUNGSTER_IAN
+	addcellnum PHONE_FIREBREATHER_WALT
+	addcellnum PHONE_LASS_KRISE
+	addcellnum PHONE_COOLTRAINERM_GAVIN
+	addcellnum PHONE_COOLTRAINERF_BETH
+	addcellnum PHONE_BIRDKEEPER_JOSE
+	addcellnum PHONE_COOLTRAINERF_REENA
+	addcellnum PHONE_YOUNGSTER_JOEY
+	addcellnum PHONE_BUG_CATCHER_WADE
+	addcellnum PHONE_FISHER_RALPH
+	addcellnum PHONE_PICNICKER_LIZ
+	addcellnum PHONE_HIKER_ANTHONY
+	addcellnum PHONE_CAMPER_TODD
+	addcellnum PHONE_PICNICKER_GINA
+	addcellnum PHONE_JUGGLER_IRWIN
+	addcellnum PHONE_BUG_CATCHER_ARNIE
+	addcellnum PHONE_SCHOOLBOY_ALAN
+	addcellnum PHONE_GENTLEMAN_ALFRED
+	addcellnum PHONE_LASS_DANA
+	addcellnum PHONE_SCHOOLBOY_CHAD
+	addcellnum PHONE_POKEFANM_DEREK
+	addcellnum PHONE_FISHER_TULLY
+	addcellnum PHONE_POKEMANIAC_BRENT
+	addcellnum PHONE_PICNICKER_TIFFANY
+	addcellnum PHONE_BIRDKEEPER_VANCE
+	addcellnum PHONE_FISHER_WILTON
+	addcellnum PHONE_BLACKBELT_KENJI
+	addcellnum PHONE_HIKER_PARRY
+	addcellnum PHONE_PICNICKER_ERIN
+	addcellnum PHONE_BUG_CATCHER_DOUG
+	addcellnum PHONE_BUG_CATCHER_ROB
+	addcellnum PHONE_FISHER_KYLE
+	addcellnum PHONE_CAMPER_TANNER
+	addcellnum PHONE_HIKER_KENNY
+	addcellnum PHONE_COUPLE_TIM_AND_SUE
+	addcellnum PHONE_BIRDKEEPER_JAMIE
+	addcellnum PHONE_SCHOOLBOY_TORIN
+	addcellnum PHONE_SCHOOLBOY_BILLY
+	addcellnum PHONE_LASS_HILLARY
+	addcellnum PHONE_TWINS_KAY_AND_TIA
+	addcellnum PHONE_BIKER_AIDEN
+	addcellnum PHONE_BIKER_EOIN
+	addcellnum PHONE_BIKER_REESE
+	addcellnum PHONE_BUENA
+;	opentext
+	writetext GotOaksNumberText
+	playsound SFX_REGISTER_PHONE_NUMBER
+	waitsfx
+	promptbutton
+;	closetext
+	writetext OaksLabOakTalkToMomText
+	waitbutton
+	closetext
+	end
+
+.JumpstdReceiveItem:
+	jumpstd ReceiveItemScript
+	end
+.pagercardname
+	db "PAGER CARD@"
+
+OaksLabRivalParcelEntranceScript:
+	readvar VAR_FACING
+	ifequal DOWN, .Short
+	appear OAKSLAB_BLUE
+	applymovement OAKSLAB_BLUE, OaksLabRivalWalksInMovement
+	end
+.Short
+	moveobject OAKSLAB_BLUE, 4, 6
+	appear OAKSLAB_BLUE
+	applymovement OAKSLAB_BLUE, OaksLabRivalWalksInMovementShort
+	end
+
+BlueScript:
+	checkevent EVENT_OAKS_LAB_OAK
+	iftrue .OakNotHere
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue .LooksStronger
+	jumptextfaceplayer OaksLabRivalNotGreedyText
+.OakNotHere
+	jumptextfaceplayer OaksLabRivalOakNotHereText
+.LooksStronger
+	jumptextfaceplayer OaksLabRivalMineLooksStrongerText
+
+OaksAssistantScript:
+	jumptextfaceplayer OaksAssistantText
+OaksAssistantText:
+	ntag "AIDE:"
+	text "I study #MON as"
+	line "PROF.OAK's AIDE."
+	done
+
+;OaksLabGirlScript:
+;	jumptextfaceplayer OaksLabGirlText
+;OaksLabGirlText:
+;	text "PROF.OAK is the"
+;	line "authority on"
+;	cont "#MON!"
+;
+;	para "Many #MON"
+;	line "trainers hold him"
+;	cont "in high regard!"
+;	done
+
+OaksLabPC: ;simple
+	opentext
+	writetext OaksLabPCText
+	promptbutton
+	checkflag ENGINE_CHALLENGE_MODE_ACTIVE
+	iffalse .OaksPCLocked
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iftrue .OaksPCLocked
+	checkevent EVENT_JOHTO_STARTERS
+	iftrue .AskChangeBack
+	writetext OaksLabPCJohtoOptionText
+	yesorno
+	iffalse .End
+	playsound SFX_SAVE
+	setevent EVENT_JOHTO_STARTERS
+	writetext OaksLabPCJohtoStarterText
+	waitbutton
+	closetext
+	end
+
+.AskChangeBack
+	writetext OaksLabPCKantoOptionText
+	yesorno
+	iffalse .End
+	playsound SFX_SAVE
+	clearevent EVENT_JOHTO_STARTERS
+	writetext OaksLabPCKantoStarterText
+	waitbutton
+	closetext
+	end
+
+.OaksPCLocked
+	writetext OaksLabPCLockedText
+	waitbutton
+.End
+	closetext
+	end
+
+OaksLabPCText:
+	text "It's PROF.OAK's"
+	line "personal computer."
+	done
+
+OaksLabPCLockedText:
+	text "…"
+
+	para "You don't know the"
+	line "password."
+	done
+
+OaksLabPCJohtoOptionText:
+	text "He forgot to sign"
+	line "out!"
+
+	para "Swap your starter"
+	line "#MON choices to"
+	cont "JOHTO starters?"
+	done
+
+OaksLabPCJohtoStarterText:
+	text "Starter #MON"
+	line "set to JOHTO."
+	done
+
+OaksLabPCKantoOptionText:
+	text "Swap your starter"
+	line "choices back to"
+	cont "KANTO starters?"
+	done
+
+OaksLabPCKantoStarterText:
+	text "Starter #MON"
+	line "set to KANTO."
+	done
+
+
+;OaksLabPC: ;password system (not working)
+;	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+;	iftrue .AlreadyGotStarter
+;	opentext
+;	writetext OaksLabPCAskPasswordText
+;	yesorno
+;	iffalse .End
+;	callasm OaksPCPasswordAsm
+;	callasm OaksPCCheckPasswordAsm
+;	iffalse .WrongPassword
+;	playsound SFX_SAVE
+;	setevent EVENT_JOHTO_STARTERS
+;	waitsfx
+;;	opentext
+;	writetext OaksPCPasswordAcceptedText
+;	waitbutton
+;.End
+;	closetext
+;	end
+;
+;.WrongPassword
+;	playsound SFX_WRONG
+;	waitsfx
+;	closetext
+;	end
+;
+;.AlreadyGotStarter
+;	jumptext OaksLabPCText
+;OaksLabPCText:
+;	text "It's PROF.OAK's"
+;	line "personal computer."
+;	done
+;
+;	para "…"
+;
+;	para "You don't know"
+;	line "the password."
+;	done
+
+;OaksLabPCAskPasswordText:
+;	text "It's PROF.OAK's"
+;	line "personal computer."
+;
+;	para "It's locked…"
+;
+;	para "Do you want to"
+;	line "input a password?"
+;	done
+
+;OaksPCPasswordAcceptedText:
+;	text "Password Accepted"
+;
+;	para "Starter #MON"
+;	cont "set to JOHTO."
+;
+;	para "To change back to"
+;	line "KANTO starters,"
+;	cont "input any wrong"
+;	roll "password."
+;	done
+
+;OaksPCPasswordAsm:
+;	push de
+;	call LoadStandardMenuHeader
+;	call DisableSpriteUpdates
+;	pop de
+;	push de
+;	ld b, NAME_PASSWORD
+;	ld de, wGreensName
+;;	ld a, $03 ; bank3?
+;;	rst Bankswitch
+;;	call NamingScreen
+;;	ld a, $15
+;;	rst Bankswitch
+;	farcall NamingScreen
+;	pop hl
+;	ld de, wStringBuffer1
+;	call InitName
+;	ld a, $4 ; ExitAllMenus is in bank 0; maybe it used to be in bank 4
+;	ld hl, ExitAllMenus
+;	rst FarCall
+;	ret
+
+;OaksPCCheckPasswordAsm:
+;	xor a
+;	ld [wScriptVar], a
+;	ld de, JohtoPassword
+;	ld hl, wGreensName ; check saved password
+;	ld c, 4
+;	call CompareBytes
+;	ret nz
+;	ld a, 1
+;	ld [wScriptVar], a
+;	ret
+
+;JohtoPassword:
+;	db "JOHTO"
+
+PokedexScript:
+	jumptext OaksLabPokedexText
+OaksLabPokedexText:
+	text "It's encyclopedia-"
+	line "like, but the"
+	cont "pages are blank!"
+	done
+
+OaksLabTrashcan:
+	jumpstd TrashCanScript
+
+OaksLabDifficultBookshelf:
+	jumpstd DifficultBookshelfScript
+
+; movements
+OaksLabPlayerWalkInMovement:
+	step UP
+	step UP
+	step UP
+	step UP
+	step UP
+	step UP
+	step UP
+OaksLabDontLeaveMovement:
+	step UP
+	step_end
+
+RivalTakesCharmanderMovement:
+	step DOWN
+	step RIGHT
+	step RIGHT
+	turn_head UP
+	step_end
+
+RivalTakesSquirtleMovementShort:
+	step DOWN
+	step RIGHT
+	step RIGHT
+	step RIGHT
+	turn_head UP
+	step_end
+
+RivalTakesSquirtleMovementLong:
+	step DOWN
+	step DOWN
+	step RIGHT
+	step RIGHT
+	step RIGHT
+	step UP
+	step_end
+
+RivalTakesBulbasaurMovement:
+	step DOWN
+	step DOWN
+	step RIGHT
+	step RIGHT
+	step RIGHT
+	step RIGHT
+	step UP
+	step_end
+
+OaksLabRivalStepRightMovement:
+	slow_step RIGHT
+	step_end
+
+OaksLabRivalStepLeftMovement:
+	slow_step LEFT
+	step_end
+
+OaksLabRivalBattleBulbasaurMovement:
+	step LEFT
+OaksLabRivalBattleSquirtleMovement:
+	step LEFT
+OaksLabRivalBattleCharmanderMovement:
+	step LEFT
+	step DOWN
+	step_end
+
+OaksLabRivalLeavesMovement:
+	slow_step DOWN
+	slow_step DOWN
+	slow_step DOWN
+	slow_step DOWN
+	slow_step DOWN
+	slow_step DOWN
+	step_sleep 10
+	step_end
+
+OaksLabRivalWalksInMovement:
+	slow_step UP
+OaksLabRivalWalksInMovementShort:
+	slow_step UP
+	slow_step UP
+	slow_step UP
+	step_end
+
+; npc text
+OaksLabRivalOakNotHereText:
+	ntag "<RIVAL>:"
+	text "Yo, <PLAYER>!"
+	line "GRAMPS isn't here!"
+	done
+
+OaksLabIntroConversationText:
+	ntag "<RIVAL>:"
+	text "GRAMPS! I'm fed"
+	line "up with waiting!@"
+
+	text_promptbutton
+	ntag "PROF.OAK:"
+	text "<RIVAL>?"
+	line "Let me think…"
+
+	para "Oh, that's right,"
+	line "I told you to"
+	cont "come! Just wait!"
+
+	para "Here, <PLAYER>!"
+
+	para "There are three"
+	line "#MON here!"
+
+	para "Haha!"
+
+	para "They are inside"
+	line "the #BALLs."
+
+	para "When I was young,"
+	line "I was a serious"
+	cont "#MON trainer!"
+
+	para "Now that you're"
+	line "old enough to have"
+	cont "your own #MON,"
+	roll "you can have one"
+	cont "of mine!"
+
+;	para "In my old age, I"
+;	line "have only 3 left,"
+;	cont "but you can have"
+;	roll "one!"
+
+	para "Choose!@"
+
+	text_promptbutton
+	ntag "<RIVAL>:"
+	text "Hey! GRAMPS!"
+	line "What about me?@"
+
+	text_promptbutton
+	ntag "PROF.OAK:"
+	text "Be patient!"
+	line "<RIVAL>, you can"
+	cont "have one too!"
+	done
+
+OaksLabWhichPokemonDoYouWantText:
+	ntag "PROF.OAK:"
+	text "<PLAYER>, which"
+	line "#MON would you"
+	cont "like?"
+	done
+
+OaksLabDidntChooseStarterText:
+	ntag "PROF.OAK:"
+	text "Think it over"
+	line "carefully."
+
+	para "Your partner is"
+	line "important."
+	done
+
+OaksLabWildPokemonText:
+	ntag "PROF.OAK:"
+	text "If a wild #MON"
+	line "appears, your"
+	cont "#MON can fight"
+	roll "against it!"
+	done
+
+OaksLabDontLeaveText:
+	ntag "PROF.OAK:"
+	text "Hey! Don't leave"
+	line "yet!"
+	done
+
+OaksLabRivalNotGreedyText:
+	ntag "<RIVAL>:"
+	text "Heh, I don't need"
+	line "to be greedy."
+
+	para "You choose first,"
+	line "<PLAYER>!"
+	done
+
+;OaksLabTakeCharmanderText:
+;	text "You want the"
+;	line "FIRE #MON,"
+;	cont "CHARMANDER?"
+;	done
+OaksLabTakeFireStarterText:
+	text "You want the"
+	line "FIRE #MON,"
+	cont "@"
+	text_ram wStringBuffer3
+	text "?"
+	done
+
+;OaksLabTakeSquirtleText:
+;	text "You want the"
+;	line "WATER #MON,"
+;	cont "SQUIRTLE?"
+;	done
+OaksLabTakeWaterStarterText:
+	text "You want the"
+	line "WATER #MON,"
+	cont "@"
+	text_ram wStringBuffer3
+	text "?"
+	done
+
+;OaksLabTakeBulbasaurText:
+;	text "You want the"
+;	line "GRASS #MON,"
+;	cont "BULBASAUR?"
+;	done
+OaksLabTakeGrassStarterText:
+	text "You want the"
+	line "GRASS #MON,"
+	cont "@"
+	text_ram wStringBuffer3
+	text "?"
+	done
+
+OaksLabChoseStarterText:
+	text "This #MON is"
+	line "really energetic!"
+	done
+
+OaksLabReceivedStarterText:
+	text "<PLAYER> received"
+	line "@"
+	text_ram wStringBuffer3
+	text "!"
+	done
+
+OaksLabRivalTakesPokemonText:
+	ntag "<RIVAL>:"
+	text "Then I'll take"
+	line "this one!"
+	done
+
+OaksLabRivalMineLooksStrongerText:
+	ntag "<RIVAL>:"
+	text "My #MON looks"
+	line "a lot stronger."
+	done
+
+OaksLabRivalBattleChallengeText:
+	ntag "<RIVAL>:"
+	text "Wait <PLAYER>!"
+	
+	para "Let's check out"
+	line "our #MON!"
+
+	para "Come on, I'll take"
+	line "you on!"
+	done
+
+OaksLabRivalBattleWinText:
+;	text "<RIVAL>: WHAT?"
+;	line "Unbelievable!"
+;	cont "I picked the"
+;	roll "wrong #MON!"
+;	done
+
+	ntag "<RIVAL>:"
+	text "What!?"
+	line "Unbelievable!"
+	cont "I picked the"
+	roll "wrong #MON!"
+	done
+
+OaksLabRivalBattleLossText:
+;	text "<RIVAL>: Yeah! Am"
+;	line "I great or what?"
+;	done
+
+	ntag "<RIVAL>:"
+	text "Yeah! Am I great,"
+	line "or what?"
+	done
+
+OaksLabAfterRivalBattleText:
+	ntag "<RIVAL>:"
+	text "Okay! I'll make"
+	line "my #MON fight"
+	cont "to toughen it up!"
+
+	para "<PLAYER>! GRAMPS!"
+	line "Smell you later!"
+	done
+
+OaksLabRaisePokemonText:
+	ntag "PROF.OAK:"
+	text "<PLAYER>, #MON"
+	line "grow by gaining"
+	cont "experience points"
+	roll "from battles."
+
+	para "Raise your young"
+	line "#MON by making"
+	cont "it fight!"
+	done
+
+;	ntag "PROF.OAK:"
+;	text "<PLAYER>,"
+;	line "raise your young"
+;	cont "#MON by making"
+;	roll "it fight!"
+;	done
+
+OaksLabHowIsMyPokemonText:
+	ntag "PROF.OAK:"
+	text "Oh, <PLAYER>!"
+
+	para "How is my old"
+	line "#MON?"
+
+	para "Well, it seems to"
+	line "like you a lot."
+
+	para "You must be"
+	line "talented as a"
+	cont "#MON trainer!"
+
+	para "What? You have"
+	line "something for me?"
+	
+	para "<PLAYER> delivered"
+	line "OAK's PARCEL."
+	done
+
+OaksLabParcelThanksText:
+	ntag "PROF.OAK:"
+	text "Ah! This is the"
+	line "custom #BALL I"
+	cont "ordered."
+
+	para "Thank you!"
+	done
+
+OaksLabRivalGrampsText:
+	ntag "<RIVAL>:"
+	text "GRAMPS!"
+	done
+
+OaksLabWhatDidYouCallMeForText:
+	ntag "<RIVAL>:"
+	text "What did you call"
+	line "me for?"
+	done
+
+OaksLabOakHaveRequestText:
+	ntag "PROF.OAK:"
+	text "Oh right!"
+	line "I have a request"
+	cont "of you two."
+
+	para "On the desk there"
+	line "is my invention,"
+	cont "the #DEX!"
+
+	para "It automatically"
+	line "records data on"
+	cont "#MON you've"
+	roll "seen or caught!"
+
+	para "It's a hi-tech"
+	line "encyclopedia!"
+
+	para "<PLAYER>, <RIVAL>!"
+	line "Take these with"
+	cont "you!"
+	done
+
+OaksLabGotPokedexText:
+	text "<PLAYER> got a"
+	line "#DEX from OAK!"
+	done
+
+;OaksLabOaksDreamText:
+OaksLabOaksDreamGivePagerText:
+	ntag "PROF.OAK:"
+	text "To make a complete"
+	line "guide on all the"
+	cont "#MON in the"
+	roll "world…"
+
+	para "That was my dream!"
+
+	para "But, I'm too old!"
+	line "I can't do it!"
+
+	para "So, I want you two"
+	line "to fulfill my"
+	cont "dream for me!"
+
+	para "Get moving, you"
+	line "two!"
+
+	para "This is a great"
+	line "undertaking in"
+	cont "#MON history!"
+;	done
+
+;OaksLabOakGivePagerText:
+;	text ""
+	para "<PLAYER>, <RIVAL>,"
+	line "Take this, too."
+
+	para "It will come in"
+	line "handy on your"
+	cont "#MON journey."
+	done
+
+GotPagerCardText:
+	text "<PLAYER>'s #GEAR"
+	line "now has a PPS!"
+	done
+
+OaksLabOakExplainsPagerText:
+	ntag "PROF.OAK:"
+	text "That's the latest"
+	line "#GEAR upgrade."
+;	cont "card."
+
+	para "The #MON"
+	line "PAGER SYSTEM."
+
+	para "It allows you to"
+	line "call on special"
+	cont "#MON to aid you"
+	roll "on your travels."
+
+	para "But you'll need to"
+	line "get PAGER CARDs"
+	cont "to make use of it.@"
+
+	text_promptbutton
+	ntag "<RIVAL>:"
+	text "Alright, GRAMPS!"
+	line "Leave it all to"
+	cont "me!"
+	done
+
+OaksLabRivalLeavesAfterPokedexText:
+	ntag "<RIVAL>:"
+	text "<PLAYER>, I hate to"
+	line "say it, but I don't"
+	cont "need you!"
+
+	para "I know! I'll"
+	line "borrow a MAP CARD"
+	cont "for the #GEAR"
+	roll "from my sis!"
+	done
+
+OaksLabOakGivePhoneNumberText:
+	ntag "PROF.OAK:"
+	text "<PLAYER>, filling"
+	line "the #DEX is a"
+	cont "big undertaking."
+	
+	para "So, here is my"
+	line "phone number."
+	cont "You can call me if"
+	roll "anything comes up!"
+	done
+
+GotOaksNumberText:
+	text "<PLAYER> got OAK's"
+	line "phone number."
+	done
+
+OaksLabOakTalkToMomText:
+	ntag "PROF.OAK:"
+	text "You have a long"
+	line "journey ahead of"
+	cont "you."
+
+	para "Make sure that you"
+	line "talk to your mom"
+	cont "before you leave."
+	done
+
+OaksLabPokemonAwaitText:
+	ntag "PROF.OAK:"
+	text "<PLAYER>! #MON"
+	line "around the world"
+	cont "await you!"
+	done
+
+OaksLabOakGivesPokeballsText:
+	ntag "PROF.OAK:"
+	text "You can't record"
+	line "detailed data on"
+	cont "#MON by just"
+	roll "seeing them."
+
+	para "You must catch"
+	line "them! Use these"
+	cont "to capture wild"
+	roll "#MON."
+	done
+
+OaksLabGetPokeballsText:
+	text "<PLAYER> received"
+	line "some #BALLs."
+	done
+
+OaksLabPokeballExplainationText:
+	ntag "PROF.OAK:"
+	text "Whenever a wild"
+	line "#MON appears,"
+	cont "it's fair game."
+
+	para "Just throw a BALL"
+	line "at it and try to"
+	cont "catch it!"
+
+	para "This won't always"
+	line "work, though."
+
+	para "A healthy #MON"
+	line "could escape."
+
+	para "You need to weaken"
+	line "them first."
+	done
+
+OakGiveTicketText1:
+	ntag "PROF.OAK:"
+	text "<PLAYER>!"
+	line "There you are!"
+
+	para "I called because"
+	line "I have something"
+	cont "for you."
+
+	para "It's a ticket to"
+	line "ride the S.S.AQUA!"
+
+	para "Now you can catch"
+	line "#MON in JOHTO!"
+	done
+
+OakGiveTicketText2:
+	ntag "PROF.OAK:"
+	text "Board the ship at"
+	line "VERMILION CITY!"
+
+	para "It sails to"
+	line "OLIVINE CITY far"
+	cont "to the west!"
+
+	para "You should visit"
+	line "my friend PROF.ELM"
+	cont "in NEW BARK TOWN!"
+
+	para "I'm sure he would"
+	line "love to see how"
+	cont "your #DEX is"
+	roll "coming along!"
+	done
+
+; bg text
+OaksPokeBallText:
+	text "That's PROF.OAK's"
+	line "last #MON!"
+	done
+
+OaksLabThoseArePokeballsText:
+	text "It's a #BALL."
+	line "It has a #MON"
+	cont "inside!"
+	done
+;	text "Those are #-"
+;	line "BALLs. They"
+;	cont "contain #MON!"
+;	done
+
+OakLabEvaluateDexText:
+	ntag "PROF.OAK:"
+	text "<PLAYER>!"
+	line "How are you doing"
+	cont "on your #DEX?"
+
+	para "Let's see…"
+	done
+
+OakLabOakGoodbyeText:
+	ntag "PROF.OAK:"
+	text "If you're in the"
+	line "area, I hope you"
+	cont "come visit again."
+	done
+
+OakScript_2:
+	faceplayer
+	opentext
+	checkevent EVENT_BEAT_MT_SILVER_OAK
+	iftrue .AskDexOfferRematchScript
+	checkevent EVENT_GOT_SS_TICKET_FROM_OAK
+	iftrue .EvaluatePokedex
+	checkevent EVENT_BEAT_ELITE_FOUR
+	iftrue .OakGiveTicket
+	; fallthrough
+
+.EvaluatePokedex
+	writetext OakLabEvaluateDexText
+	promptbutton
+	special ProfOaksPCBoot
+	writetext OakLabOakGoodbyeText
+	waitbutton
+	closetext
+	end
+
+.OakGiveTicket
+	writetext OakGiveTicketText1
+	promptbutton
+	giveitem S_S_TICKET
+	iffalse .NoRoomForTicket
+	waitsfx
+	writetext OaksLabReceivedSSTicketText
+	playsound SFX_KEY_ITEM
+	waitsfx
+	itemnotify
+	setevent EVENT_GOT_SS_TICKET_FROM_OAK
+	writetext OakGiveTicketText2
+	waitbutton
+.NoRoomForTicket
+	closetext
+	end
+
+.AskDexOfferRematchScript
+	writetext OaksLabAskEvaluateDexText
+	yesorno
+	iffalse .OfferRematch
+	special ProfOaksPCBoot
+	writetext OakLabOakGoodbyeText
+	waitbutton
+	closetext
+	end
+
+.OfferRematch
+	writetext OaksLabOakAskRematchText
+	yesorno
+	iffalse .DeclinedRematch
+; rematch
+	winlosstext OaksLabOakWinLossText, OaksLabOakWinLossText
+	checkevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	iftrue .OakCharizard
+	checkevent EVENT_GOT_BULBASAUR_FROM_OAK
+	iftrue .OakBlastoise
+;OakVenusaur:
+	loadtrainer POKEMON_PROF, OAK_T_VENUSAUR
+	loadmem VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	reloadmapafterbattle
+	sjump .FinishOaksLabOak
+.OakCharizard:
+	loadtrainer POKEMON_PROF, OAK_T_CHARIZARD
+	loadmem VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	dontrestartmapmusic
+	reloadmap ;reloadmapafterbattle
+	sjump .FinishOaksLabOak
+.OakBlastoise:
+	loadtrainer POKEMON_PROF, OAK_T_BLASTOISE
+	loadmem VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	dontrestartmapmusic
+	reloadmap ;reloadmapafterbattle
+
+.FinishOaksLabOak
+	special HealParty
+	opentext
+	writetext OaksLabOak_AfterBattleText
+	waitbutton
+	closetext
+	end
+
+.DeclinedRematch
+	writetext OaksLabOakDeclinedRematchText
+	waitbutton
+	closetext
+	end
+
+OaksLabAskEvaluateDexText:
+	ntag "PROF.OAK:"
+	text "<PLAYER>!"
+	line "How's your progress"
+	cont "on the #DEX?"
+
+	para "Can I check it?"
+	done
+
+OaksLabReceivedSSTicketText:
+	text "<PLAYER> received"
+	line "an S.S.TICKET!"
+	done
+
+OaksLabOakAskRematchText:
+	ntag "PROF.OAK:"
+	text "Okay, some other"
+	line "time."
+
+	para "What about a"
+	line "battle instead?"
+
+	para "Our battle at"
+	line "MT.SILVER got my"
+	cont "blood moving!"
+
+	para "I had forgotten"
+	line "how much I enjoy"
+	cont "a good #MON"
+	roll "battle!"
+
+	para "Just say the word,"
+	line "and we can have a"
+	cont "rematch."
+	done
+
+OaksLabOakDeclinedRematchText:
+	ntag "PROF.OAK:"
+	text "Okay, some other"
+	line "time, then."
+	done
+
+OaksLabOakWinLossText:
+	ntag "PROF.OAK:"
+	text "What a thrilling"
+	line "battle!"
+	done
+
+OaksLabOak_AfterBattleText:
+	ntag "PROF.OAK:"
+	text "Anytime you want"
+	line "to battle again,"
+	cont "just let me know."
+	done
+
+
+;info
+OaksLabPoster1:
+	jumptext OaksLabPoster1Text
+OaksLabPoster1Text:
+	text "Read the books on"
+	line "OAK's bookshelves"
+	cont "for info about"
+	roll "this game."
+	done
+
+OaksLabBookshelf1:
+	jumptext OaksLabBookshelf1Text
+OaksLabBookshelf1Text:
+;	text "Press START to"
+;	line "open the MENU."
+;	done
+	text "You can reset the"
+	line "clock by pressing"
+	cont "DOWN + SELECT + B"
+	roll "on title screen."
+	done
+
+OaksLabBookshelf2:
+	jumptext OaksLabBookshelf2Text
+OaksLabBookshelf2Text:
+	text "Certain #MON"
+	line "appear more often"
+	cont "(or only) during"
+	roll "the DAY."
+	
+	para "Others appear more"
+	line "often (or only) at"
+	cont "NIGHT."
+
+	para "DAY: 6AM to 8PM"
+	line "NIGHT: 8PM to 6AM"
+	done
+
+OaksLabBookshelf3:
+	jumptext OaksLabBookshelf3Text
+OaksLabBookshelf3Text:
+	text "You can register"
+	line "the SELECT button"
+	cont "to use an item"
+	roll "from your PACK."
+	done
+
+OaksLabBookshelf4:
+	jumptext OaksLabBookshelf4Text
+OaksLabBookshelf4Text:
+	text "Hold the B button"
+	line "to run."
+	done
+
+OaksLabBookshelf5:
+	jumptext OaksLabBookshelf5Text
+OaksLabBookshelf5Text:
+	text "The #DEX can be"
+	line "fully completed in"
+	cont "both Classic Mode"
+	roll "and Gen2 Mode."
+	done
+
+OaksLabBookshelf6:
+	jumptext OaksLabBookshelf6Text
+OaksLabBookshelf6Text:
+	text "When you call a"
+	line "trainer, they are"
+	cont "likely to offer"
+	roll "a rematch."
+
+	para "Their #MON will"
+	line "get stronger as"
+	cont "you collect more"
+	roll "GYM BADGEs."
+	done
+
+OaksLabBookshelf7:
+	jumptext OaksLabBookshelf7Text
+OaksLabBookshelf7Text:
+	text "In Classic Mode,"
+	line "#MON with Gen2"
+	cont "evolutions won't"
+	roll "evolve until after"
+	cont "you defeat the"
+	roll "ELITE FOUR."
+	done
+
+OaksLabBookshelf8:
+	jumptext OaksLabBookshelf8Text
+OaksLabBookshelf8Text:
+	text "Use OAK's PC to"
+	line "swap to alternate"
+	cont "starter #MON"
+	roll "in Gen2 Mode."
+	done
+
+
+; hints
+OaksLabHintBookshelf:
+	checkevent EVENT_GOT_A_POKEMON_FROM_OAK
+	iffalse .NotYet
+	opentext
+	writetext OaksLabAskReadHintText
+	promptbutton
+	loadmenu .HintMenuHeader
+	verticalmenu
+	closewindow
+	ifequal 1, .MewLocation
+	ifequal 2, .MissingNo
+	ifequal 3, .RareCandy
+	ifequal 4, .MasterBalls
+	ifequal 5, .RandomEggs
+;	sjump .NoHint
+;.NoHint
+;	writetext OaksLabDeclinedHintText
+;	waitbutton
+	closetext
+	end
+
+.NotYet
+	jumptext OaksLabNoHintYetText
+
+.HintMenuHeader:
+	db MENU_BACKUP_TILES ; flags
+	menu_coords 0, 0, 15, TEXTBOX_Y + 1
+	dw .MenuData
+	db 1 ; default option
+
+.MenuData:
+	db STATICMENU_CURSOR ; flags
+	db 6 ; items
+	db "MEW LOCATION@"
+	db "MISSINGNO.@"
+	db "RARE CANDY@"
+	db "MASTER BALLs@"
+	db "RANDOM EGGs@"
+	db "CANCEL@"
+
+.MewLocation
+	writetext OaksLabMewHintText
+	waitbutton
+	closetext
+	end
+
+.MissingNo
+	writetext OaksLabMissingnoHintText
+	waitbutton
+	closetext
+	end
+
+.RareCandy
+	writetext OaksLabRareCandyHintText
+	waitbutton
+	closetext
+	end
+
+.MasterBalls
+	writetext OaksLabMasterBallsHintText
+	waitbutton
+	closetext
+	end
+
+.RandomEggs
+	writetext OaksLabRandomEggsHintText
+	waitbutton
+	closetext
+	end
+
+OaksLabNoHintYetText:
+	text "These books have"
+	line "secrets in them."
+
+	para "You shouldn't read"
+	line "them yet."
+	done
+
+OaksLabAskReadHintText:
+	text "These books have"
+	line "secrets in them."
+	done
+
+OaksLabDeclinedHintText:
+	text "Better not."
+	done
+
+OaksLabMewHintText:
+	text "Somehow there's a"
+	line "truck parked at"
+	cont "VERMILION PORT…"
+	done
+
+OaksLabMissingnoHintText:
+	text "“Old man glitch”"
+
+	para "Let the old man"
+	line "show you how to"
+	cont "catch #MON."
+
+	para "Fly to CINNABAR,"
+	line "and SURF along"
+	cont "the east coast."
+	done
+
+;	text "An OLD MAN from"
+;	line "VIRIDIAN CITY…"
+;	
+;	para "Something strange"
+;	line "on CINNABAR's east"
+;	cont "coast…"
+;	done
+
+OaksLabRareCandyHintText:
+	text "You will get some"
+	line "RARE CANDY after"
+	cont "each encounter"
+	roll "with MISSINGNO."
+	done
+
+OaksLabMasterBallsHintText:
+	text "MISSINGNO will"
+	line "always be holding"
+	cont "a MASTER BALL."
+	done
+
+OaksLabRandomEggsHintText:
+	text "You can get random"
+	line "#MON EGGs from"
+	cont "the DAYCARE if you"
+	roll "leave MISSINGNO"
+	cont "with a DITTO."
+	done
+
+OaksLabStartersHintText:
+	text "KANTO starters"
+	line "can be caught at"
+	cont "ROUTE 10 NORTH."
+
+	para "JOHTO starters"
+	line "are found behind"
+	cont "TOHJO FALLS."
+
+	para "But you need to"
+	line "have WATERFALL to"
+	cont "reach those areas."
+	done
+
+OaksLabSwarmShinyHintText:
+	text "Swarming #MON"
+	line "have a high chance"
+	cont "to be shiny."
+	done
+
+
+if DEF(_DEBUG)
+; back bookshelves
+DebugFullPokegear:
+	opentext
+	writetext DebugFullPokegearText
+	yesorno
+	iffalse .End
+	setevent EVENT_GOT_POKEDEX
+	setflag ENGINE_POKEDEX
+	setflag ENGINE_POKEGEAR
+	setflag ENGINE_PHONE_CARD
+	setflag ENGINE_MAP_CARD
+	setflag ENGINE_PAGER_CARD
+	setflag ENGINE_RADIO_CARD
+	setflag ENGINE_EXPN_CARD
+	setflag ENGINE_PAGER_CUT
+	setflag ENGINE_PAGER_FLY
+	setflag ENGINE_PAGER_SURF
+	setflag ENGINE_PAGER_STRENGTH
+	setflag ENGINE_PAGER_FLASH
+;	setflag ENGINE_PAGER_WHIRLPOOL
+	setflag ENGINE_PAGER_ROCK_SMASH
+	setflag ENGINE_BOULDERBADGE
+	setflag ENGINE_CASCADEBADGE
+	setflag ENGINE_THUNDERBADGE
+	setflag ENGINE_RAINBOWBADGE
+	setflag ENGINE_MARSHBADGE
+	setflag ENGINE_SOULBADGE
+	setflag ENGINE_VOLCANOBADGE
+	setflag ENGINE_EARTHBADGE
+	setflag ENGINE_FLYPOINT_NEW_BARK
+	setflag ENGINE_FLYPOINT_CHERRYGROVE
+	setflag ENGINE_FLYPOINT_VIOLET
+	setflag ENGINE_FLYPOINT_AZALEA
+	setflag ENGINE_FLYPOINT_GOLDENROD
+	setflag ENGINE_FLYPOINT_ECRUTEAK
+	setflag ENGINE_FLYPOINT_OLIVINE
+	setflag ENGINE_FLYPOINT_CIANWOOD
+	setflag ENGINE_FLYPOINT_MAHOGANY
+	setflag ENGINE_FLYPOINT_LAKE_OF_RAGE
+	setflag ENGINE_FLYPOINT_BLACKTHORN
+	setflag ENGINE_FLYPOINT_SILVER_CAVE
+	setflag ENGINE_FLYPOINT_INDIGO_PLATEAU
+	setflag ENGINE_FLYPOINT_PALLET
+	setflag ENGINE_FLYPOINT_VIRIDIAN
+	setflag ENGINE_FLYPOINT_PEWTER
+	setflag ENGINE_FLYPOINT_CERULEAN
+	setflag ENGINE_FLYPOINT_VERMILION
+	setflag ENGINE_FLYPOINT_CELADON
+	setflag ENGINE_FLYPOINT_ROCK_TUNNEL
+	setflag ENGINE_FLYPOINT_LAVENDER
+	setflag ENGINE_FLYPOINT_FUCHSIA
+	setflag ENGINE_FLYPOINT_SAFFRON
+	setflag ENGINE_FLYPOINT_CINNABAR
+;	setflag ENGINE_FLYPOINT_SAFARI_ZONE_GATE
+;	setflag ENGINE_UNLOCKED_UNOWNS_A_TO_K
+;	setflag ENGINE_UNLOCKED_UNOWNS_L_TO_R
+;	setflag ENGINE_UNLOCKED_UNOWNS_S_TO_W
+;	setflag ENGINE_UNLOCKED_UNOWNS_X_TO_Z
+.End
+	closetext
+	end
+
+DebugFullPokegearText:
+	text "Full #GEAR?"
+	line "Fly Anywhere?"
+	done
+
+DebugAllTMs:
+	opentext
+	writetext DebugAllTMsText
+	yesorno
+	iffalse .End
+	giveitem TM_DYNAMICPUNCH ;TM01 ; aa
+	giveitem TM_DRAGON_CLAW  ;TM02 ; ab
+	giveitem TM_SURF         ;TM03 ; ac
+	giveitem TM_CALM_MIND    ;TM04 ; ad
+	giveitem TM_WILL_O_WISP  ;TM05 ; ae
+	giveitem TM_TOXIC        ;TM06 ; af
+	giveitem TM_MEDITATE     ;TM07 ; b0
+	giveitem TM_BODY_SLAM    ;TM08 ; b1
+	giveitem TM_BULLET_SEED  ;TM09 ; b2
+	giveitem TM_HIDDEN_POWER ;TM10 ; b3
+	giveitem TM_BUBBLEBEAM   ;TM11 ; b4
+	giveitem TM_WATER_GUN    ;TM12 ; b5
+	giveitem TM_ICE_BEAM     ;TM13 ; b6
+	giveitem TM_BLIZZARD     ;TM14 ; b7
+	giveitem TM_HYPER_BEAM   ;TM15 ; b8
+	giveitem TM_PAY_DAY      ;TM16 ; b9
+	giveitem TM_PROTECT      ;TM17 ; ba
+	giveitem TM_COUNTER      ;TM18 ; bb
+	giveitem TM_SEISMIC_TOSS ;TM19 ; bc
+	giveitem TM_ENDURE       ;TM20 ; bd
+	giveitem TM_GIGA_DRAIN   ;TM21 ; be
+	giveitem TM_SOLARBEAM    ;TM22 ; bf
+	giveitem TM_IRON_TAIL    ;TM23 ; c0
+	giveitem TM_THUNDERBOLT  ;TM24 ; c1
+	giveitem TM_THUNDER      ;TM25 ; c2
+	giveitem TM_EARTHQUAKE   ;TM26 ; c3
+	giveitem TM_FISSURE      ;TM27 ; c4
+	giveitem TM_DIG          ;TM28 ; c5
+	giveitem TM_PSYCHIC_M    ;TM29 ; c6
+	giveitem TM_WATER_PULSE  ;TM30 ; c7
+	giveitem TM_MUD_SLAP     ;TM31 ; c8
+	giveitem TM_DOUBLE_TEAM  ;TM32 ; c9
+	giveitem TM_REFLECT      ;TM33 ; ca
+	giveitem TM_ROCK_TOMB    ;TM34 ; cb ;BIDE
+	giveitem TM_METRONOME    ;TM35 ; cc
+	giveitem TM_SELFDESTRUCT ;TM36 ; cd
+	giveitem TM_SUBMISSION   ;TM37 ; ce
+	giveitem TM_FIRE_BLAST   ;TM38 ; cf
+	giveitem TM_SWIFT        ;TM39 ; d0
+	giveitem TM_AERIAL_ACE   ;TM40 ; d1
+	giveitem TM_FLAMETHROWER ;TM41 ; d2
+	giveitem TM_SPARK        ;TM42 ; d3
+	giveitem TM_SKY_ATTACK   ;TM43 ; d4
+	giveitem TM_REST         ;TM44 ; d5
+	giveitem TM_THUNDER_WAVE ;TM45 ; d6
+	giveitem TM_HONE_CLAWS   ;TM46 ; d7
+	giveitem TM_ICY_WIND     ;TM47 ; d8
+	giveitem TM_ROCK_SLIDE   ;TM48 ; d9
+	giveitem TM_TRI_ATTACK   ;TM49 ; da
+	giveitem TM_SUBSTITUTE   ;TM50 ; db
+	giveitem TM_ROOST        ;TM51 ; dc
+	giveitem TM_FOCUS_BLAST  ;TM52 ; dd
+	giveitem TM_ENERGY_BALL  ;TM53 ; de
+	giveitem TM_FALSE_SWIPE  ;TM54 ; df
+	giveitem TM_BRICK_BREAK  ;TM55 ; e0
+	giveitem TM_HEADBUTT     ;TM56 ; e1
+	giveitem TM_AIR_SLICE    ;TM57 ; e2
+	giveitem TM_DOUBLE_EDGE  ;TM58 ; e3
+	giveitem TM_DRAGON_PULSE ;TM59 ; e4
+	giveitem TM_FLASH_CANNON ;TM60 ; e5
+	giveitem TM_ROLLOUT      ;TM61 ; e6
+	giveitem TM_SILVER_WIND  ;TM62 ; e7 ;new, where?
+	giveitem TM_SLUDGE_BOMB  ;TM63 ; e8
+	giveitem TM_SWAGGER      ;TM64 ; e9
+	giveitem TM_SHADOW_CLAW  ;TM65 ; ea
+	giveitem TM_THIEF        ;TM66 ; eb
+	giveitem TM_STEEL_WING   ;TM67 ; ec
+	giveitem TM_GIGA_IMPACT  ;TM68 ; ed
+	giveitem TM_CURSE        ;TM69 ; ee
+	giveitem TM_SHADOW_BALL  ;TM70 ; ef
+	giveitem TM_STONE_EDGE   ;TM71 ; f0
+	giveitem TM_POISON_JAB   ;TM72 ; f1
+	giveitem TM_ATTRACT      ;TM73 ; f2
+	giveitem TM_GYRO_BALL    ;TM74 ; f3
+	giveitem TM_SWORDS_DANCE ;TM75 ; f4
+	giveitem TM_SUNNY_DAY    ;TM76 ; f5
+	giveitem TM_RAIN_DANCE   ;TM77 ; f6
+	giveitem TM_SANDSTORM    ;TM78 ; f7
+	giveitem TM_DARK_PULSE   ;TM79 ; f8
+	giveitem TM_ANCIENTPOWER ;TM80 ; f9
+	giveitem TM_X_SCISSOR    ;TM81 ; fa
+	giveitem TM_WHIRLPOOL    ;TM82 ; fb
+	giveitem TM_WATERFALL    ;TM83 ; fc
+;	giveitem TM_TACKLE       ;TM84 ; fd
+;	giveitem TM_TACKLE       ;TM85 ; fd
+.End
+	closetext
+	end
+
+DebugAllTMsText:
+	text "All TMs?"
+	done
+
+DebugAllHMs:
+	opentext
+	writetext DebugAskPagerCardText
+	yesorno
+	iffalse .End
+	setflag ENGINE_PAGER_CARD
+	writetext DebugAskCutText
+	yesorno
+	iffalse .fly
+;	giveitem TM_CUT
+	setflag ENGINE_PAGER_CUT
+	setevent EVENT_GOT_HM01_CUT
+.fly
+	writetext DebugAskFlyText
+	yesorno
+	iffalse .surf
+;	giveitem TM_FLY
+	setflag ENGINE_PAGER_FLY
+	setevent EVENT_GOT_HM02_FLY
+.surf
+	writetext DebugAskSurfText
+	yesorno
+	iffalse .strength
+	giveitem TM_SURF
+	setflag ENGINE_PAGER_SURF
+	setevent EVENT_GOT_HM03_SURF
+.strength
+	writetext DebugAskStrengthText
+	yesorno
+	iffalse .flash
+;	giveitem TM_STRENGTH
+	setflag ENGINE_PAGER_STRENGTH
+	setevent EVENT_GOT_HM04_STRENGTH
+.flash
+	writetext DebugAskFlashText
+	yesorno
+	iffalse .whirlpool
+;	giveitem TM_FLASH
+	setflag ENGINE_PAGER_FLASH
+	setevent EVENT_GOT_HM05_FLASH
+.whirlpool
+	writetext DebugAskWhirlpoolText
+	yesorno
+	iffalse .waterfall
+	giveitem TM_WHIRLPOOL
+	setflag ENGINE_STORMBADGE ;ENGINE_PAGER_WHIRLPOOL
+	setevent EVENT_GOT_HM06_WHIRLPOOL
+.waterfall
+	writetext DebugAskWaterfallText
+	yesorno
+	iffalse .rocksmash
+	giveitem TM_WATERFALL
+	setevent EVENT_GOT_HM07_WATERFALL
+	setflag ENGINE_CAN_USE_WATERFALL
+.rocksmash
+	writetext DebugAskRockSmashText
+	yesorno
+	iffalse .End
+	giveitem TM_BRICK_BREAK
+	setflag ENGINE_PAGER_ROCK_SMASH
+	setevent EVENT_GOT_TM58_ROCK_SMASH
+.End
+	closetext
+	end
+
+DebugAskPagerCardText:
+	text "Enable"
+	line "PAGER CARD?"
+	done
+
+DebugAskCutText:
+	text "CUT?"
+	done
+
+DebugAskFlyText:
+	text "FLY?"
+	done
+
+DebugAskSurfText:
+	text "SURF?"
+	done
+
+DebugAskStrengthText:
+	text "STRENGTH?"
+	done
+
+DebugAskFlashText:
+	text "FLASH?"
+	done
+
+DebugAskWhirlpoolText:
+	text "WHIRLPOOL?"
+	done
+
+DebugAskWaterfallText:
+	text "WATERFALL?"
+	done
+
+DebugAskRockSmashText:
+	text "ROCKSMASH?"
+	done
+
+DebugMasterBalls:
+	opentext
+	writetext DebugMasterBallsText
+	yesorno
+	iffalse .End
+	giveitem MASTER_BALL, 40
+	giveitem MAX_REPEL, 40
+.End
+	closetext
+	end
+
+DebugMasterBallsText:
+	text "MASTER BALLs and"
+	line "MAX REPELs?"
+	done
+
+DebugSkipFastShip:
+	opentext
+	writetext DebugSkipFastShipText
+	yesorno
+	iffalse .End
+;	checkevent EVENT_BEAT_E4_CHAMPION
+;	iffalse .NotReady
+	warp OLIVINE_CITY, 13, 22
+;.NotReady
+;	writetext DebugCompleteKantoFirstText
+;	waitbutton
+.End
+	closetext
+	end
+
+DebugSkipFastShipText:
+	text "Skip FAST SHIP?"
+	done
+;
+;DebugCompleteKantoFirstText:
+;	text "debug Complete"
+;	line "Kanto first!"
+;	done
+
+DebugCredits:
+	opentext
+	writetext DebugRollCreditsText
+	yesorno
+	iffalse .End
+	credits
+.End
+	closetext
+	end
+
+DebugRollCreditsText:
+	text "Roll credits?"
+	done
+
+DebugLancesRoom:
+	opentext
+	writetext DebugLancesRoomText
+	yesorno
+	iffalse .End
+	warp E4_LANCES_ROOM, 4, 21
+.End
+	closetext
+	end
+
+DebugLancesRoomText:
+	text "Go to LANCE's ROOM?"
+	done
+
+DebugSFXRoom:
+	opentext
+	writetext DebugSFXRoomText
+	yesorno
+	iffalse .End
+	warp DEBUG_SOUND_ROOM, 1, 1
+.End
+	closetext
+	end
+
+DebugSFXRoomText:
+	text "Go to SFX Room?"
+	done
+
+
+; front bookshelves
+DebugBeatKantoLeaders:
+	opentext
+	writetext DebugBeatBrockText
+	yesorno
+	iffalse .misty
+	setflag ENGINE_BOULDERBADGE
+	setevent EVENT_BEAT_BROCK
+.misty
+	opentext
+	writetext DebugBeatMistyText
+	yesorno
+	iffalse .surge
+	setflag ENGINE_CASCADEBADGE
+	setevent EVENT_BEAT_MISTY
+.surge
+	opentext
+	writetext DebugBeatSurgeText
+	yesorno
+	iffalse .erika
+	setflag ENGINE_THUNDERBADGE
+	setevent EVENT_BEAT_LTSURGE
+.erika
+	opentext
+	writetext DebugBeatErikaText
+	yesorno
+	iffalse .koga
+	setflag ENGINE_RAINBOWBADGE
+	setevent EVENT_BEAT_ERIKA
+.koga
+	opentext
+	writetext DebugBeatKogaText
+	yesorno
+	iffalse .sabrina
+	setflag ENGINE_MARSHBADGE
+	setevent EVENT_BEAT_KOGA
+.sabrina
+	opentext
+	writetext DebugBeatSabrinaText
+	yesorno
+	iffalse .blaine
+	setflag ENGINE_SOULBADGE
+	setevent EVENT_BEAT_SABRINA
+.blaine
+	opentext
+	writetext DebugBeatBlaineText
+	yesorno
+	iffalse .giovanni
+	setflag ENGINE_VOLCANOBADGE
+	setevent EVENT_BEAT_BLAINE
+.giovanni
+	opentext
+	writetext DebugBeatGiovanniText
+	yesorno
+	iffalse .End
+	setflag ENGINE_EARTHBADGE
+	setevent EVENT_BEAT_GIOVANNI
+.End
+	closetext
+	end
+
+DebugBeatBrockText:
+	text "Beat BROCK?"
+	done
+
+DebugBeatMistyText:
+	text "Beat MISTY?"
+	done
+
+DebugBeatSurgeText:
+	text "Beat SURGE?"
+	done
+
+DebugBeatErikaText:
+	text "Beat ERIKA?"
+	done
+
+DebugBeatKogaText:
+	text "Beat KOGA?"
+	done
+
+DebugBeatSabrinaText:
+	text "Beat SABRINA?"
+	done
+
+DebugBeatBlaineText:
+	text "Beat BLAINE?"
+	done
+
+DebugBeatGiovanniText:
+	text "Beat GIOVANNI?"
+	done
+
+DebugBeatJohtoLeaders:
+	opentext
+	writetext DebugBeatJasmineText
+	yesorno
+	iffalse .morty
+	setflag ENGINE_MINERALBADGE
+	setevent EVENT_BEAT_JASMINE
+.morty
+	opentext
+	writetext DebugBeatMortyText
+	yesorno
+	iffalse .whitney
+	setflag ENGINE_FOGBADGE
+	setevent EVENT_BEAT_MORTY
+.whitney
+	opentext
+	writetext DebugBeatWhitneyText
+	yesorno
+	iffalse .bugsy
+	setflag ENGINE_PLAINBADGE
+	setevent EVENT_BEAT_WHITNEY
+.bugsy
+	opentext
+	writetext DebugBeatBugsyText
+	yesorno
+	iffalse .falkner
+	setflag ENGINE_HIVEBADGE
+	setevent EVENT_BEAT_BUGSY
+.falkner
+	opentext
+	writetext DebugBeatFalknerText
+	yesorno
+	iffalse .pryce
+	setflag ENGINE_ZEPHYRBADGE
+	setevent EVENT_BEAT_FALKNER
+.pryce
+	opentext
+	writetext DebugBeatPryceText
+	yesorno
+	iffalse .chuck
+	setflag ENGINE_GLACIERBADGE
+	setevent EVENT_BEAT_PRYCE
+.chuck
+	opentext
+	writetext DebugBeatChuckText
+	yesorno
+	iffalse .clair
+	setflag ENGINE_STORMBADGE
+	setevent EVENT_BEAT_CHUCK
+.clair
+	opentext
+	writetext DebugBeatClairText
+	yesorno
+	iffalse .End
+	setflag ENGINE_RISINGBADGE
+	setevent EVENT_BEAT_CLAIR
+.End
+	closetext
+	end
+
+DebugBeatJasmineText:
+	text "Beat JASMINE?"
+	done
+
+DebugBeatMortyText:
+	text "Beat MORTY?"
+	done
+
+DebugBeatWhitneyText:
+	text "Beat WHITNEY?"
+	done
+
+DebugBeatBugsyText:
+	text "Beat BUGSY?"
+	done
+
+DebugBeatFalknerText:
+	text "Beat FALKNER?"
+	done
+
+DebugBeatPryceText:
+	text "Beat PRYCE?"
+	done
+
+DebugBeatChuckText:
+	text "Beat CHUCK?"
+	done
+
+DebugBeatClairText:
+	text "Beat CLAIR?"
+	done
+
+DebugLockedKantoGyms:
+	opentext
+	writetext DebugViridianGymText
+	yesorno
+	iffalse .End
+	setevent EVENT_CINNABAR_GYM_LEADER_RETURNED
+	setevent EVENT_VIRIDIAN_GYM_LEADER_RETURNED
+.End
+	closetext
+	end
+
+DebugViridianGymText:
+	text "Unlock CINNABAR,"
+	line "VIRIDIAN GYMs?"
+	done
+
+DebugCompleteKanto:
+	opentext
+	writetext DebugCompleteKantoText
+	yesorno
+	iffalse .End
+	setevent EVENT_GOT_POKEDEX
+	setflag ENGINE_POKEDEX
+	setflag ENGINE_POKEGEAR
+	setflag ENGINE_PHONE_CARD
+	setflag ENGINE_MAP_CARD
+	setflag ENGINE_PAGER_CARD
+	setflag ENGINE_RADIO_CARD
+	setflag ENGINE_EXPN_CARD
+	setflag ENGINE_PAGER_CUT
+	setflag ENGINE_PAGER_FLY
+	setflag ENGINE_PAGER_SURF
+	setflag ENGINE_PAGER_STRENGTH
+	setflag ENGINE_PAGER_FLASH
+	setflag ENGINE_STORMBADGE ;ENGINE_PAGER_WHIRLPOOL
+	setflag ENGINE_PAGER_ROCK_SMASH
+	setevent EVENT_GOT_HM01_CUT
+	setevent EVENT_GOT_HM02_FLY
+	setevent EVENT_GOT_HM03_SURF
+	setevent EVENT_GOT_HM04_STRENGTH
+	setevent EVENT_GOT_HM05_FLASH
+	setflag ENGINE_BOULDERBADGE
+	setflag ENGINE_CASCADEBADGE
+	setflag ENGINE_THUNDERBADGE
+	setflag ENGINE_RAINBOWBADGE
+	setflag ENGINE_MARSHBADGE
+	setflag ENGINE_SOULBADGE
+	setflag ENGINE_VOLCANOBADGE
+	setflag ENGINE_EARTHBADGE
+	setflag ENGINE_FLYPOINT_INDIGO_PLATEAU
+	setflag ENGINE_FLYPOINT_PALLET
+	setflag ENGINE_FLYPOINT_VIRIDIAN
+	setflag ENGINE_FLYPOINT_PEWTER
+	setflag ENGINE_FLYPOINT_CERULEAN
+	setflag ENGINE_FLYPOINT_VERMILION
+	setflag ENGINE_FLYPOINT_CELADON
+	setflag ENGINE_FLYPOINT_ROCK_TUNNEL
+	setflag ENGINE_FLYPOINT_LAVENDER
+	setflag ENGINE_FLYPOINT_FUCHSIA
+	setflag ENGINE_FLYPOINT_SAFFRON
+	setflag ENGINE_FLYPOINT_CINNABAR
+	setevent EVENT_CINNABAR_GYM_LEADER_RETURNED
+	setevent EVENT_VIRIDIAN_GYM_LEADER_RETURNED
+	setevent EVENT_BEAT_BROCK
+	setevent EVENT_BEAT_MISTY
+	setevent EVENT_BEAT_LTSURGE
+	setevent EVENT_BEAT_ERIKA
+	setevent EVENT_BEAT_KOGA
+	setevent EVENT_BEAT_SABRINA
+	setevent EVENT_BEAT_BLAINE
+	setevent EVENT_BEAT_GIOVANNI
+	setevent EVENT_BEAT_GIOVANNI_HIDEOUT
+	setevent EVENT_BEAT_GIOVANNI_SILPHCO
+	setflag ENGINE_BOULDERBADGE
+	setflag ENGINE_CASCADEBADGE
+	setflag ENGINE_THUNDERBADGE
+	setflag ENGINE_RAINBOWBADGE
+	setflag ENGINE_MARSHBADGE
+	setflag ENGINE_SOULBADGE
+	setflag ENGINE_VOLCANOBADGE
+	setflag ENGINE_EARTHBADGE
+	setevent EVENT_BEAT_E4_LORELEI
+	setevent EVENT_BEAT_E4_BRUNO
+	setevent EVENT_BEAT_E4_AGATHA
+	setevent EVENT_BEAT_E4_LANCE
+	setevent EVENT_BEAT_E4_CHAMPION
+	warp HALL_OF_FAME, 4, 9
+.End
+	closetext
+	end
+
+DebugCompleteKantoText:
+	text "Complete KANTO?"
+	done
+
+DebugGotCharmander:
+	opentext
+	writetext DebugGotCharmanderText
+	yesorno
+	iffalse .End
+	setevent EVENT_GOT_POKEDEX
+	setflag ENGINE_POKEDEX
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	clearevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	clearevent EVENT_GOT_BULBASAUR_FROM_OAK
+	setevent EVENT_GOT_CHARMANDER_FROM_OAK
+.End
+	closetext
+	end
+
+DebugGotCharmanderText:
+	text "Got CHARMANDER?"
+	done
+
+DebugGotSquirtle:
+	opentext
+	writetext DebugGotSquirtleText
+	yesorno
+	iffalse .End
+	setevent EVENT_GOT_POKEDEX
+	setflag ENGINE_POKEDEX
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	clearevent EVENT_GOT_CHARMANDER_FROM_OAK
+	clearevent EVENT_GOT_BULBASAUR_FROM_OAK
+	setevent EVENT_GOT_SQUIRTLE_FROM_OAK
+.End
+	closetext
+	end
+
+DebugGotSquirtleText:
+	text "Got SQUIRTLE?"
+	done
+
+DebugGotBulbasaur:
+	opentext
+	writetext DebugGotBulbasaurText
+	yesorno
+	iffalse .End
+	setevent EVENT_GOT_POKEDEX
+	setflag ENGINE_POKEDEX
+	setevent EVENT_GOT_A_POKEMON_FROM_OAK
+	clearevent EVENT_GOT_CHARMANDER_FROM_OAK
+	clearevent EVENT_GOT_SQUIRTLE_FROM_OAK
+	setevent EVENT_GOT_BULBASAUR_FROM_OAK
+.End
+	closetext
+	end
+
+DebugGotBulbasaurText:
+	text "Got BULBASAUR?"
+	done
+
+DebugBeatEliteFour:
+	opentext
+	writetext DebugBeatEliteFourText
+	yesorno
+	iffalse .End
+	setevent EVENT_BEAT_E4_LORELEI
+	setevent EVENT_BEAT_E4_BRUNO
+	setevent EVENT_BEAT_E4_AGATHA
+	setevent EVENT_BEAT_E4_LANCE
+	setevent EVENT_BEAT_E4_CHAMPION
+;	setflag ENGINE_CREDITS_SKIP
+;	setevent EVENT_BEAT_ELITE_FOUR
+	warp HALL_OF_FAME, 4, 9
+.End
+	closetext
+	end
+
+DebugBeatEliteFourText:
+	text "Beat ELITE FOUR?"
+	done
+
+DebugRareCandy:
+	opentext
+	writetext DebugRareCandyText
+	yesorno
+	iffalse .end
+	verbosegiveitem RARE_CANDY, 10
+.end
+	closetext
+	end
+
+DebugRareCandyText:
+	text "10 RARE CANDY?"
+	done
+endc
+
+
+OaksLab_MapEvents:
+	db 0, 0 ; filler
+
+	def_warp_events
+	warp_event  4, 11, PALLET_TOWN, 3
+	warp_event  5, 11, PALLET_TOWN, 3
+
+	def_coord_events
+;	coord_event  4,  6, SCENE_OAKSLAB_MEET_OAK, OaksLabTryToLeaveScript
+;	coord_event  5,  6, SCENE_OAKSLAB_MEET_OAK, OaksLabTryToLeaveScript
+	coord_event  4,  6, SCENE_OAKSLAB_RIVAL_BATTLE, OaksLabTryToLeaveScript ;OaksLabRivalBattleScript
+	coord_event  5,  6, SCENE_OAKSLAB_RIVAL_BATTLE, OaksLabTryToLeaveScript ;OaksLabRivalBattleScript
+
+	def_bg_events
+; oak bookshelves
+	bg_event  6,  1, BGEVENT_READ, OaksLabDifficultBookshelf ;DebugGotCharmander
+	bg_event  7,  1, BGEVENT_READ, OaksLabHintBookshelf ;DebugGotSquirtle
+	bg_event  8,  1, BGEVENT_READ, OaksLabDifficultBookshelf ;DebugGotBulbasaur
+	bg_event  9,  1, BGEVENT_READ, OaksLabDifficultBookshelf ;DebugBeatEliteFour
+
+if DEF(_DEBUG)
+; back bookshelves
+	bg_event  0,  6, BGEVENT_READ, DebugFullPokegear
+	bg_event  1,  6, BGEVENT_READ, DebugAllTMs
+	bg_event  2,  6, BGEVENT_READ, DebugAllHMs
+	bg_event  3,  6, BGEVENT_READ, DebugMasterBalls
+	bg_event  6,  6, BGEVENT_READ, DebugSkipFastShip
+	bg_event  7,  6, BGEVENT_READ, DebugCredits
+	bg_event  8,  6, BGEVENT_READ, DebugLancesRoom
+	bg_event  9,  6, BGEVENT_READ, DebugSFXRoom
+; front bookshelves
+	bg_event  0,  7, BGEVENT_READ, DebugBeatKantoLeaders
+	bg_event  1,  7, BGEVENT_READ, DebugBeatJohtoLeaders
+	bg_event  2,  7, BGEVENT_READ, DebugLockedKantoGyms
+	bg_event  3,  7, BGEVENT_READ, DebugCompleteKanto
+	bg_event  6,  7, BGEVENT_READ, DebugGotBulbasaur
+	bg_event  7,  7, BGEVENT_READ, DebugGotCharmander
+	bg_event  8,  7, BGEVENT_READ, DebugGotSquirtle
+	bg_event  9,  7, BGEVENT_READ, DebugRareCandy
+else
+; front bookshelves
+	bg_event  0,  7, BGEVENT_READ, OaksLabBookshelf1
+	bg_event  1,  7, BGEVENT_READ, OaksLabBookshelf2
+	bg_event  2,  7, BGEVENT_READ, OaksLabBookshelf3
+	bg_event  3,  7, BGEVENT_READ, OaksLabBookshelf4
+	bg_event  6,  7, BGEVENT_READ, OaksLabBookshelf5
+	bg_event  7,  7, BGEVENT_READ, OaksLabBookshelf6
+	bg_event  8,  7, BGEVENT_READ, OaksLabBookshelf7
+	bg_event  9,  7, BGEVENT_READ, OaksLabBookshelf8
+endc
+
+; normal stuff
+	bg_event  4,  0, BGEVENT_READ, OaksLabPoster1
+	bg_event  5,  0, BGEVENT_READ, OaksLabPoster1
+	bg_event  9,  3, BGEVENT_READ, OaksLabTrashcan
+	bg_event  0,  1, BGEVENT_READ, OaksLabPC
+
+	def_object_events
+	object_event  5,  2, SPRITE_OAK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OakScript, EVENT_OAKS_LAB_OAK
+	object_event  4,  3, SPRITE_BLUE, SPRITEMOVEDATA_SPINRANDOM_SLOW, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, BlueScript, EVENT_OAKS_LAB_RIVAL
+	object_event  6,  3, SPRITE_POKE_BALL, SPRITEMOVEDATA_STILL, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, CharmanderPokeBallScript, EVENT_CHARMANDER_POKEBALL_IN_OAKS_LAB
+	object_event  7,  3, SPRITE_POKE_BALL, SPRITEMOVEDATA_STILL, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, SquirtlePokeBallScript, EVENT_SQUIRTLE_POKEBALL_IN_OAKS_LAB
+	object_event  8,  3, SPRITE_POKE_BALL, SPRITEMOVEDATA_STILL, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, BulbasaurPokeBallScript, EVENT_BULBASAUR_POKEBALL_IN_OAKS_LAB
+	object_event  2,  1, SPRITE_POKEDEX, SPRITEMOVEDATA_STILL, 0, 0, -1, -1, PAL_NPC_RED, OBJECTTYPE_SCRIPT, 0, PokedexScript, EVENT_GOT_POKEDEX
+	object_event  3,  1, SPRITE_POKEDEX, SPRITEMOVEDATA_STILL, 0, 0, -1, -1, PAL_NPC_RED, OBJECTTYPE_SCRIPT, 0, PokedexScript, EVENT_GOT_POKEDEX
+;	object_event  2,  3, SPRITE_BULBASAUR, SPRITEMOVEDATA_POKEMON, 0, 0, -1, -1, PAL_NPC_GREEN, OBJECTTYPE_SCRIPT, 0, OaksLabBulbasaur, EVENT_OAKS_LAB_BULBASAUR
+;	object_event  2,  3, SPRITE_CHARMANDER, SPRITEMOVEDATA_POKEMON, 0, 0, -1, -1, PAL_NPC_RED, OBJECTTYPE_SCRIPT, 0, OaksLabCharmander, EVENT_OAKS_LAB_CHARMANDER
+;	object_event  2,  3, SPRITE_SQUIRTLE, SPRITEMOVEDATA_POKEMON, 0, 0, -1, -1, PAL_NPC_BLUE, OBJECTTYPE_SCRIPT, 0, OaksLabSquirtle, EVENT_OAKS_LAB_SQUIRTLE
+	object_event  7, 10, SPRITE_SCIENTIST, SPRITEMOVEDATA_WALK_UP_DOWN, 0, 1, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksAssistantScript, -1
+	object_event  2, 10, SPRITE_SCIENTIST, SPRITEMOVEDATA_WALK_LEFT_RIGHT, 1, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksAssistantScript, -1
+;	object_event  1,  9, SPRITE_LASS, SPRITEMOVEDATA_WANDER, 1, 1, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksLabGirlScript, -1
+;
+	object_event  4,  2, SPRITE_OAK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OakScript_2, EVENT_OAKS_LAB_OAK_2

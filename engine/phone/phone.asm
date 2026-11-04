@@ -1,94 +1,70 @@
+; `c` = Which contact to add. Index starts with PHONE_00.
 AddPhoneNumber::
-	call _CheckCellNum
-	jr c, .cant_add
-	call Phone_FindOpenSlot
-	jr nc, .cant_add
-	ld [hl], c
+	push bc
+		call _CheckCellNum
+	pop bc
+	jr c, .already_exists
+	push de
+		ld e, c
+		dec e
+		ld d, 0
+		ld b, SET_FLAG
+		push hl
+			ld hl, wPhoneList
+			call FlagAction
+		pop hl
+	pop de
 	xor a
 	ret
 
-.cant_add
+.already_exists
 	scf
 	ret
 
+; `c` = Which contact to delete. Index starts with PHONE_00.
 DelCellNum::
-	call _CheckCellNum
+	push bc
+		call _CheckCellNum
+	pop bc
 	jr nc, .not_in_list
+	push de
+		ld e, c
+		dec e
+		ld d, 0
+		ld b, RESET_FLAG
+		push hl
+			ld hl, wPhoneList
+			call FlagAction
+		pop hl
+	pop de
 	xor a
-	ld [hl], a
 	ret
 
 .not_in_list
 	scf
 	ret
 
+; `c` = Which contact to check
+; It's using the index that starts with PHONE_00, I think.
+;
+; Returns carry if the contact is in your list.
 CheckCellNum::
-	jp _CheckCellNum ; useless
-
 _CheckCellNum:
-	ld hl, wPhoneList
-	ld b, CONTACT_LIST_SIZE
-.loop
-	ld a, [hli]
-	cp c
-	jr z, .got_it
-	dec b
-	jr nz, .loop
-	xor a
-	ret
-
-.got_it
-	dec hl
-	scf
-	ret
-
-Phone_FindOpenSlot:
-	call GetRemainingSpaceInPhoneList
-	ld b, a
-	ld hl, wPhoneList
-.loop
-	ld a, [hli]
-	and a
-	jr z, .FoundOpenSpace
-	dec b
-	jr nz, .loop
-	xor a
-	ret
-
-.FoundOpenSpace:
-	dec hl
-	scf
-	ret
-
-GetRemainingSpaceInPhoneList:
-	xor a
-	ld [wRegisteredPhoneNumbers], a
-	ld hl, PermanentNumbers
-.loop
-	ld a, [hli]
-	cp -1
-	jr z, .done
-	cp c
-	jr z, .continue
-
-	push bc
+	push de
 	push hl
-	ld c, a
-	call _CheckCellNum
-	jr c, .permanent
-	ld hl, wRegisteredPhoneNumbers
-	inc [hl]
-.permanent
+		ld hl, wPhoneList
+		ld e, c
+		dec e
+		ld d, 0
+		ld b, CHECK_FLAG
+		call FlagAction
 	pop hl
-	pop bc
-
-.continue
-	jr .loop
-
-.done
-	ld a, CONTACT_LIST_SIZE
-	ld hl, wRegisteredPhoneNumbers
-	sub [hl]
+		pop de
+	ld a, c
+	and a
+; not found, so carry is not set
+	ret z
+	scf
 	ret
 
 INCLUDE "data/phone/permanent_numbers.asm"
@@ -126,7 +102,6 @@ CheckPhoneCall::
 	and a
 	jr nz, .no_call
 
-	call GetAvailableCallers
 	call ChooseRandomCaller
 	jr nc, .no_call
 
@@ -162,80 +137,79 @@ CheckPhoneContactTimeOfDay:
 	pop hl
 	ret
 
+; Sets carry if we have someone calling us.
 ChooseRandomCaller:
-; If no one is available to call, don't return anything.
-	ld a, [wNumAvailableCallers]
-	and a
-	jr z, .NothingToSample
-
-; Store the number of available callers in c.
-	ld c, a
-; Sample a random number between 0 and 31.
-	call Random
-	ldh a, [hRandomAdd]
-	swap a
-	and $1f
-; Compute that number modulo the number of available callers.
-	call SimpleDivide
-; Return the caller ID you just sampled.
-	ld c, a
-	ld b, 0
-	ld hl, wAvailableCallers
-	add hl, bc
-	ld a, [hl]
-	scf
-	ret
-
-.NothingToSample:
-	xor a
-	ret
-
-GetAvailableCallers:
+; Check the time and save it for the "should call" check
+; later on.
 	farcall CheckTime
 	ld a, c
 	ld [wCheckedTime], a
-	ld hl, wNumAvailableCallers
-	ld bc, CONTACT_LIST_SIZE + 1
-	xor a
-	call ByteFill
-	ld de, wPhoneList
-	ld a, CONTACT_LIST_SIZE
 
-.loop
-	ld [wPhoneListIndex], a
-	ld a, [de]
-	and a
-	jr z, .not_good_for_call
+; Get the list of all contacts we have. wAvailableCallers is available but we're
+; not gonna use that.
+	ld a, BANK(sSortedPhoneContacts)
+	call OpenSRAM
+	call SortPhoneContacts
+; Right now sSortedPhoneContacts starts at 00 so we can use this to avoid
+; subtracting 16 bit numbers or whatever. `hl` is at the end of the list plus one.
+	assert LOW(sSortedPhoneContacts) == $00
+; So getting the length is as simple as:
+	ld c, l
+
+; Sample a random number.
+	call Random
+; Get the modulo (at `a`) of this over how many contacts we actually have
+; (already loaded at `c`).
+	ldh a, [hRandomAdd]
+	call SimpleDivide
+
+	assert LOW(sSortedPhoneContacts) == $00
+	ld l, a
+	ld h, HIGH(sSortedPhoneContacts)
+
+; Well we got a contact ID...
+; and one that starts with PHONE_00 too
+; Received phone contact will be in `e` because that's what the vanilla code
+; asks for or something.
+	ld e, [hl]
+
+; ...So we're done with accessing SRAM
+	call CloseSRAM
+
+; Check if it's the right time of day for them to be calling us
 	ld hl, PhoneContacts + PHONE_CONTACT_SCRIPT2_TIME
 	ld bc, PHONE_CONTACT_SIZE
+	ld a, e
 	call AddNTimes
 	ld a, [wCheckedTime]
 	and [hl]
-	jr z, .not_good_for_call
+; Not the right time
+	ret z
+
+; Check the map group
 	ld bc, PHONE_CONTACT_MAP_GROUP - PHONE_CONTACT_SCRIPT2_TIME
 	add hl, bc
 	ld a, [wMapGroup]
 	cp [hl]
-	jr nz, .different_map
-	inc hl
+; If the contact is in a different map group, there isn't a chance they can be
+; in the same map as us...
+	jr nz, .different_group
+
+; If the contact is in the exact same map as us, don't call.
+	inc hl ; PHONE_CONTACT_MAP_NUMBER
 	ld a, [wMapNumber]
 	cp [hl]
-	jr z, .not_good_for_call
-.different_map
-	ld a, [wNumAvailableCallers]
-	ld c, a
-	ld b, 0
-	inc a
-	ld [wNumAvailableCallers], a
-	ld hl, wAvailableCallers
-	add hl, bc
-	ld a, [de]
-	ld [hl], a
-.not_good_for_call
-	inc de
-	ld a, [wPhoneListIndex]
-	dec a
-	jr nz, .loop
+	jr z, .no_call
+
+; ...so they should always be able to call us.
+.different_group
+; `e` should remain intact here, which is the caller ID we got.
+	ld a, e
+	scf
+	ret
+
+.no_call
+	and a
 	ret
 
 CheckSpecialPhoneCall::
