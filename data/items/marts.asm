@@ -5,10 +5,12 @@ Marts:
 	dw MartBallsOne
 	dw MartBallsThree
 	dw MartBallsFive
+	dw MartBallsSeven
 	dw MartMedZero
 	dw MartMedTwo
 	dw MartMedFour
 	dw MartMedSix
+	dw MartMedEight
 ;	dw MartVendingMachine
 	dw MartTMs1
 	dw MartEvolution1
