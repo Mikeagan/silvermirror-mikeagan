@@ -8,14 +8,14 @@ GoldenrodDeptStore2F_MapScripts:
 GoldenrodDeptStore2FBallClerkScript:
 	faceplayer
 	opentext
-	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
 	closetext
 	end
 
 GoldenrodDeptStore2FMedClerkScript:
 	faceplayer
 	opentext
-	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

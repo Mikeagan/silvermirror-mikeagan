@@ -8,6 +8,7 @@ CeladonDeptStore2F_MapScripts:
 CeladonMart2FClerkScript:
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .BallsSeven
 	ifgreater 4, .BallsFive
 	pokemart MARTTYPE_STANDARD, MART_BALLS_THREE
 	closetext
@@ -16,10 +17,15 @@ CeladonMart2FClerkScript:
 	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
 	closetext
 	end
+.BallsSeven
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
+	closetext
+	end
 
 CeladonMart2FMedScript:
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .MedEight
 	ifgreater 5, .MedSix
 	ifequal 4, .MedFour
 	pokemart MARTTYPE_STANDARD, MART_MED_TWO
@@ -31,6 +37,10 @@ CeladonMart2FMedScript:
 	end
 .MedSix
 	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	closetext
+	end
+.MedEight
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

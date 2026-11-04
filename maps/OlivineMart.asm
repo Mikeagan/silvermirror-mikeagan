@@ -8,13 +8,13 @@ OlivineMart_MapScripts:
 OlivineMartClerkScript:
 	faceplayer
 	opentext
-	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
 	closetext
 	end
 
 OlivineMartMedScript:
 	opentext
-	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

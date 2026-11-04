@@ -41,9 +41,10 @@ ViridianMartClerkScript:
 	faceplayer
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .BallsSeven
 	ifgreater 4, .BallsFive
 	ifequal 3, .BallsThree
-	ifequal 1, .BallsOne
+	ifgreater 0, .BallsOne
 	pokemart MARTTYPE_STANDARD, MART_BALLS_ZERO
 	closetext
 	end
@@ -57,6 +58,10 @@ ViridianMartClerkScript:
 	end
 .BallsFive
 	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
+	closetext
+	end
+.BallsSeven
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
 	closetext
 	end
 

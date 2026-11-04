@@ -55,6 +55,17 @@ MartBallsThree:
 	db -1 ; end
 
 MartBallsFive:
+	db 7 ; # items
+	db POKE_BALL
+	db GREAT_BALL
+	db ULTRA_BALL
+	db ESCAPE_ROPE
+	db REPEL
+	db SUPER_REPEL
+	db MAX_REPEL
+	db -1 ; end
+	
+MartBallsSeven:
 	db 8 ; # items
 	db POKE_BALL
 	db GREAT_BALL
@@ -100,6 +111,23 @@ MartMedSix:
 	db HYPER_POTION
 	db REVIVE
 	db FULL_HEAL
+	db ANTIDOTE
+	db AWAKENING
+	db PARLYZ_HEAL
+	db BURN_HEAL
+	db ICE_HEAL
+	db -1 ; end
+	
+MartMedEight:
+	db 13 ; # items
+	db POTION
+	db SUPER_POTION
+	db HYPER_POTION
+	db MAX_POTION
+	db REVIVE
+	db MAX_REVIVE
+	db FULL_HEAL
+	db FULL_RESTORE
 	db ANTIDOTE
 	db AWAKENING
 	db PARLYZ_HEAL

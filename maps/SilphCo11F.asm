@@ -162,7 +162,7 @@ SilphCo11FPresident:
 	iftrue .GotMasterBall
 	writetext SilphCo11FPresidentThanksText
 	promptbutton
-	verbosegiveitem MASTER_BALL
+	verbosegiveitem MASTER_BALL, 5
 	iffalse .End
 	setevent EVENT_GOT_MASTER_BALL_FROM_SILPH_CO
 .GotMasterBall
@@ -196,7 +196,7 @@ SilphCo11FPresidentThanksText:
 SilphCo11FPresidentMasterBallText:
 	ntag "PRESIDENT:"
 	text "You can't buy that"
-	line "anywhere!"
+	line "anywhere YET!"
 
 	para "It's our secret"
 	line "prototype:"
