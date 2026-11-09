@@ -53,50 +53,54 @@ GoldenrodUndergroundCheckDayOfWeekCallback:
 
 ; Sunday: ;bitter, older, younger
 	disappear GOLDENRODUNDERGROUND_BARGAIN
+	checktime NITE
+	iffalse .NotSundayNite
+	appear GOLDENRODUNDERGROUND_BARGAIN
+.NotSundayNite
 	appear GOLDENRODUNDERGROUND_BITTER
 	appear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
 	appear GOLDENRODUNDERGROUND_YOUNGER_HAIRCUT_BROTHER
 	endcallback
 
-.Monday: ;bargain(morn)
+.Monday: ;bargain(NIGHT)
 	disappear GOLDENRODUNDERGROUND_BARGAIN
-	checktime MORN
-	iffalse .NotMondayMorning
+	checktime NITE
+	iffalse .NotMondayNite
 	appear GOLDENRODUNDERGROUND_BARGAIN
-.NotMondayMorning
+.NotMondayNite
 	disappear GOLDENRODUNDERGROUND_BITTER
 	disappear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
 	disappear GOLDENRODUNDERGROUND_YOUNGER_HAIRCUT_BROTHER
 	endcallback
 
-.Tuesday: ;bargain(morn), older
+.Tuesday: ;bargain(NIGHT), older
 	disappear GOLDENRODUNDERGROUND_BARGAIN
-	checktime MORN
-	iffalse .NotTuesdayMorning
+	checktime NITE
+	iffalse .NotTuesdayNite
 	appear GOLDENRODUNDERGROUND_BARGAIN
-.NotTuesdayMorning
+.NotTuesdayNite
 	disappear GOLDENRODUNDERGROUND_BITTER
 	appear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
 	disappear GOLDENRODUNDERGROUND_YOUNGER_HAIRCUT_BROTHER
 	endcallback
 
-.Wednesday: ;bargain(morn), older, younger
+.Wednesday: ;bargain(NIGHT), older, younger
 	disappear GOLDENRODUNDERGROUND_BARGAIN
-	checktime MORN
-	iffalse .NotWednesdayMorning
+	checktime NITE
+	iffalse .NotWednesdayNite
 	appear GOLDENRODUNDERGROUND_BARGAIN
-.NotWednesdayMorning
+.NotWednesdayNite
 	disappear GOLDENRODUNDERGROUND_BITTER
 	appear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
 	appear GOLDENRODUNDERGROUND_YOUNGER_HAIRCUT_BROTHER
 	endcallback
 
-.Thursday: ;bargain(morn), older
+.Thursday: ;bargain(NIGHT), older
 	disappear GOLDENRODUNDERGROUND_BARGAIN
-	checktime MORN
-	iffalse .NotThursdayMorning
+	checktime NITE
+	iffalse .NotThursdayNite
 	appear GOLDENRODUNDERGROUND_BARGAIN
-.NotThursdayMorning
+.NotThursdayNite
 	disappear GOLDENRODUNDERGROUND_BITTER
 	appear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
 	disappear GOLDENRODUNDERGROUND_YOUNGER_HAIRCUT_BROTHER
@@ -104,12 +108,21 @@ GoldenrodUndergroundCheckDayOfWeekCallback:
 
 .Friday: ;older, younger
 	disappear GOLDENRODUNDERGROUND_BARGAIN
+	checktime NITE
+	iffalse .NotFridayNite
+	appear GOLDENRODUNDERGROUND_BARGAIN
+.NotFridayNite
 	disappear GOLDENRODUNDERGROUND_BITTER
 	appear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
 	appear GOLDENRODUNDERGROUND_YOUNGER_HAIRCUT_BROTHER
 	endcallback
 
-.Saturday: ;bargain(morn), bitter, older
+.Saturday: ;bargain(NIGHT), bitter, older
+	disappear GOLDENRODUNDERGROUND_BARGAIN
+	checktime NITE
+	iffalse .NotSaturdayNite
+	appear GOLDENRODUNDERGROUND_BARGAIN
+.NotSaturdayNite
 	disappear GOLDENRODUNDERGROUND_BARGAIN
 	appear GOLDENRODUNDERGROUND_BITTER
 	appear GOLDENRODUNDERGROUND_OLDER_HAIRCUT_BROTHER
@@ -122,14 +135,17 @@ BargainMerchantScript:
 	checkflag ENGINE_GOLDENROD_UNDERGROUND_MERCHANT_CLOSED
 	iftrue GoldenrodUndergroundScript_ShopClosed
 	readvar VAR_WEEKDAY
-	ifequal MONDAY, .CheckMorn
-	ifequal TUESDAY, .CheckMorn
-	ifequal WEDNESDAY, .CheckMorn
-	ifequal THURSDAY, .CheckMorn
+	ifequal SUNDAY, .CheckNight
+	ifequal MONDAY, .CheckNight
+	ifequal TUESDAY, .CheckNight
+	ifequal WEDNESDAY, .CheckNight
+	ifequal THURSDAY, .CheckNight
+	ifequal FRIDAY, .CheckNight
+	ifequal SATURDAY, .CheckNight
 	sjump GoldenrodUndergroundScript_ShopClosed
 
-.CheckMorn:
-	checktime MORN
+.CheckNight:
+	checktime NITE
 	iffalse GoldenrodUndergroundScript_ShopClosed
 	pokemart MARTTYPE_BARGAIN, 0
 	closetext

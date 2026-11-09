@@ -637,14 +637,6 @@ RespawnRoamingMew:
 	ret
 
 MrPsychic:
-;	farcall _MrPsychic
-;	ret
-;; Introduce himself
-;	ld hl, MrPsychicIntroText
-;	call PrintText
-;	call YesNoBox
-;	jp c, .cancel
-
 ; Select a Pokemon from your party
 	ld hl, MrPsychicWhichMonText
 	call PrintText
@@ -667,7 +659,7 @@ MrPsychic:
 	ld a, [hl]
 	ld [wTempMonDVs + 1], a
 
-; Show selected party mon's DVs
+; Show selected party mon's DVs (Screen 1)
 	ld hl, MrPsychicReadingText
 	call PrintText
 
@@ -678,8 +670,40 @@ MrPsychic:
 	ld hl, MrPsychicPotentialText
 	call PrintText
 	call WaitButton
-	call CloseText ; close text to clear the stats window
-	call OpenText  ; open text again for the farewell
+	call CloseText ; Clear the DV display window cleanly
+
+; Get selected party mon's Stat EXP.
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1HPExp
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+	
+	; Copy 10 bytes (5 stats * 2 bytes each) of Stat EXP to a safe temporary buffer
+	; Assuming your engine has an equivalent wTempMonStatExp buffer structured for printing
+	ld de, wTempMonStatExp
+	ld c, 10
+.copyStatExpLoop:
+	ld a, [hli]
+	ld [de], a
+	inc de
+	dec c
+	jr nz, .copyStatExpLoop
+
+; Show selected party mon's Stat EXP (Screen 2)
+	call OpenText
+	ld hl, MrPsychicStatExpText
+	call PrintText
+
+	predef PrintTempMonStatExp
+	; Ensure your engine has a layout predef to format/render the 10 bytes on screen
+
+	ld hl, MrPsychicFinishedReadingText
+	call PrintText
+	call WaitButton
+	
+	call CloseText ; Clear the Stat EXP display window cleanly
+	call OpenText  ; Open text final time for the farewell dialogue
+	jr .done       ; FIX: Bypasses falling into the .cancel route below
 
 .cancel
 	ld hl, MrPsychicComeAgainText
@@ -692,10 +716,7 @@ MrPsychic:
 	call PrintText
 	ret
 
-;MrPsychicIntroText:
-;	text_far _MrPsychicIntroText
-;	text_end
-
+; Text Pointer Maps
 MrPsychicWhichMonText:
 	text_far _MrPsychicWhichMonText
 	text_end
@@ -708,6 +729,14 @@ MrPsychicPotentialText:
 	text_far _MrPsychicPotentialText
 	text_end
 
+MrPsychicStatExpText:
+	text_far _MrPsychicStatExpText
+	text_end
+
+MrPsychicFinishedReadingText:
+	text_far _MrPsychicFinishedReadingText
+	text_end
+
 MrPsychicComeAgainText:
 	text_far _MrPsychicComeAgainText
 	text_end
@@ -716,27 +745,30 @@ MrPsychicEggText:
 	text_far _MrPsychicEggText
 	text_end
 
-RevealHiddenPower:
-;	farcall _RevealHiddenPower
-;	ret
-; Select a Pokemon from your party
+RevealHiddenPower::
+	; 1. Ask the player to select a Pokémon from their party
 	ld hl, MeditateWithWhichMonText
 	call PrintText
 	farcall SelectMonFromParty
 	jr c, .cancel
+	
+	; 2. Safeguard against Egg selection
 	ld a, [wCurPartySpecies]
 	cp EGG
 	jr z, .egg
 
-; Load selected party mon's nickname into the wStringBuffer1.
+	; 3. Load the selected Pokémon's nickname into the text buffer
 	call GetCurNickname
-	farcall CopyPokemonName_Buffer1_Buffer3
-
-; Show selected party mon's DVs
+	
+	; 4. Run the internal engine calculation to determine Hidden Power Type & Power.
+	; This fills wStringBuffer1 with the type name and calculates the power level.
 	predef HiddenPower_StringBuffer1
+
+	; 5. Print the evaluation result text screen
 	ld hl, MeditationHiddenPowerText
 	call PrintText
 	call WaitButton
+	jr .done             ; Prevent falling through to the cancel routine
 
 .cancel
 	ld hl, ComeMeditateAgainText
@@ -748,6 +780,11 @@ RevealHiddenPower:
 .done
 	call PrintText
 	ret
+
+
+; ----------------------------------------------------
+; Text Pointer Definitions
+; ----------------------------------------------------
 
 MeditateWithWhichMonText:
 	text_far _MeditateWithWhichMonText

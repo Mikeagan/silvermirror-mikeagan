@@ -71,6 +71,13 @@ OakScript:
 	waitsfx
 	promptbutton
 	giveitem POKE_BALL, 5
+;	giveitem FAST_BALL, 10
+;	giveitem LOVE_BALL, 10
+;	giveitem HEAVY_BALL, 10
+;	giveitem DUSK_BALL, 10
+;	giveitem NET_BALL, 10
+;	giveitem LEVEL_BALL, 10
+;	giveitem FRIEND_BALL, 10
 ;	itemnotify
 ;	promptbutton
 ;	verbosegiveitem POKE_BALL, 5

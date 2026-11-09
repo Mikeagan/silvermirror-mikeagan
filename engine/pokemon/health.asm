@@ -1,26 +1,61 @@
 HealParty:
-	xor a
-	ld [wCurPartyMon], a
-	ld hl, wPartySpecies
+    xor a
+    ld [wCurPartyMon], a
+    ld hl, wPartySpecies
 .loop
-	ld a, [hli]
-	cp -1
-	jr z, .done
-	cp EGG
-	jr z, .next
+    ld a, [hli]
+    cp -1
+    jr z, .done
+    cp EGG
+    jr z, .next
+    push hl
+    
+    ; Check if the Pokémon currently has or previously had Pokérus
+    push bc
+    ld a, [wCurPartyMon]
+    ld bc, PARTYMON_STRUCT_LENGTH
+    ld hl, wPartyMon1 + MON_POKERUS  ; <-- FIXED HERE
+    call AddNTimes
+    ld a, [hl]
+    pop bc
+    and a ; Check if the byte is non-zero
+    jr nz, .skip_pokerus ; If non-zero, they already had or have it, so skip
+    
+    ; Check if holding a Nugget
+    push bc
+    ld a, [wCurPartyMon]
+    ld bc, PARTYMON_STRUCT_LENGTH
+    ld hl, wPartyMon1 + MON_ITEM     ; <-- FIXED HERE
+    call AddNTimes
+    ld a, [hl]
+    cp NUGGET
+    pop bc
+    jr nz, .skip_pokerus ; Skip if not holding a Nugget
+    
+    ; 25% chance check
+    call Random
+    cp 25 percent
+    jr nc, .skip_pokerus
+    
+    ; Give Pokérus
+    push bc
+    ld a, [wCurPartyMon]
+    ld bc, PARTYMON_STRUCT_LENGTH
+    ld hl, wPartyMon1 + MON_POKERUS  ; <-- FIXED HERE
+    call AddNTimes
+    ld [hl], $11 ; Give active Pokérus strain
+    pop bc
 
-	push hl
-	call HealPartyMon
-	pop hl
-
+.skip_pokerus
+    call HealPartyMon
+    pop hl
 .next
-	ld a, [wCurPartyMon]
-	inc a
-	ld [wCurPartyMon], a
-	jr .loop
-
+    ld a, [wCurPartyMon]
+    inc a
+    ld [wCurPartyMon], a
+    jr .loop
 .done
-	ret
+    ret
 
 HealPartyMon:
 	ld a, MON_SPECIES

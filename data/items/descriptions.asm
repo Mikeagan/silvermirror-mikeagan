@@ -280,7 +280,7 @@ UltraBallDesc:
 ;	db   "A BALL with a high"
 ;	next "rate of success.@"
 	db   "#BALL with a"
-	next "high catch rate.@"
+	next "high 4X catch rate.@"
 
 BrightpowderDesc:
 	db   "Lowers the foe's"
@@ -290,7 +290,7 @@ GreatBallDesc:
 ;	db   "A BALL with a good"
 ;	next "rate of success.@"
 	db   "#BALL with a"
-	next "good catch rate.@"
+	next "good 2X catch rate.@"
 
 PokeBallDesc:
 ;	db   "An item for catch-"
@@ -899,46 +899,52 @@ SacredAshDesc:
 HeavyBallDesc:
 ;	db   "A BALL for catch-"
 ;	next "ing heavy #MON.@"
-	db   "Good for catching"
-	next "heavy #MON.@"
+	db   "8X GROUND, ROCK,"
+	next "STEEL #MON.@"
 
 LevelBallDesc:
 ;	db   "A BALL for lower-"
 ;	next "level #MON.@"
-	db   "Good for catching"
-	next "low-level #MON.@"
+	db   "8X FLYING,"
+	next "ICE #MON.@"
 
 ;LureBallDesc:
 ;	db   "A BALL for #MON"
 ;	next "hooked by a ROD.@"
 NetBallDesc:
-	db   "Good for WATER- or"
-	next "BUG-type #MON.@"
+;	db   "Good for WATER- or"
+;	next "DRAGON-type #MON.@"
+	db   "8X WATER, BUG"
+	next "#MON.@"
 
 FastBallDesc:
 ;	db   "A BALL for catch-"
 ;	next "ing fast #MON.@"
-	db   "Good for catching"
-	next "fast #MON.@"
+	db   "8X ELECTRIC,"
+	next "FIGHTING #MON.@"
 
 LightBallDesc:
 	db   "Boosts PIKACHU's"
 	next "SPECIAL ATTACK.@"
 
 FriendBallDesc:
-	db   "A BALL that makes"
-	next "#MON friendly.@"
+;	db   "A BALL that makes"
+;	next "#MON friendly.@"
+	db   "8X GRASS,"
+	next "NORMAL #MON.@"
 
 ;MoonBallDesc:
 ;	db   "A BALL for MOON"
 ;	next "STONE evolvers.@"
 DuskBallDesc:
-	db   "Good for catching"
-	next "#MON at NITE.@"
+	db   "8X DARK, GHOST"
+	next "POISON #MON.@"
 
 LoveBallDesc:
-	db   "For catching the"
-	next "opposite gender.@"
+;	db   "For catching the"
+;	next "opposite gender.@"
+	db   "8X DRAGON, FIRE"
+	next "PSYCHIC #MON.@"
 
 NormalBoxDesc:
 	db   "Open it and see"

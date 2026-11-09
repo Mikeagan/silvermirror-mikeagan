@@ -1818,6 +1818,16 @@ _MrPsychicEggText::
 	roll "the surprise!"
 	done
 
+_MrPsychicStatExpText::
+	text "Here is your"
+	line "#MON's STAT EXP!"
+	done
+
+_MrPsychicFinishedReadingText::
+	text "Incredible!"
+	line "Truly stunning!"
+	done
+
 _MeditateWithWhichMonText::
 	ntag "MAN:"
 	text "Choose a #MON"
