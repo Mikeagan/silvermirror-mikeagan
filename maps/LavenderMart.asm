@@ -62,8 +62,10 @@ LavenderMartCooltrainerMText:
 	line "in the mountains."
 
 	para "I thought it was"
-	line "useless, but it"
-	cont "sold for ¥5000!"
+	line "useless, so I gave"
+  para "it to my #MON,"
+	line "it got Pokerus"
+	cont "now its stronger!"
 	done
 
 LavenderMart_MapEvents:
