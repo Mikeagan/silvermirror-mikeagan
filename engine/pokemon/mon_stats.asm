@@ -855,7 +855,7 @@ GetMonTypeIndex:
 
 
 GetStatusConditionIndex:
-; de points to status condition bytes of a pokemon from a party_struct or battle_struct
+; 'de' points to status condition bytes of a pokemon from a party_struct or battle_struct
 ; return the status condition index in 'a', and also 'd' for those who farcall
 	push de
 	inc de
@@ -912,31 +912,31 @@ PrintTempMonStatExp::
 	call PlaceString
 
 	; Print HP Exp (2 bytes)
-	hlcoord 9, 3        ; Position coordinates adjusted for tight screen width
+	hlcoord 9, 2;3        ; Position coordinates adjusted for tight screen width
 	ld de, wTempMonStatExp
 	lb bc, PRINTNUM_LEADINGZEROS | 2, 5 ; 2 bytes input, 5 max digits printed
 	call PrintNum
 
 	; Print Attack Exp (2 bytes)
-	hlcoord 9, 5
+	hlcoord 9, 4;5
 	ld de, wTempMonStatExp + 2
 	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
 	call PrintNum
 
 	; Print Defense Exp (2 bytes)
-	hlcoord 9, 7
+	hlcoord 9, 6;7
 	ld de, wTempMonStatExp + 4
 	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
 	call PrintNum
 
 	; Print Speed Exp (2 bytes)
-	hlcoord 9, 9
+	hlcoord 9, 8;9
 	ld de, wTempMonStatExp + 6
 	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
 	call PrintNum
 
 	; Print Special Exp (2 bytes)
-	hlcoord 9, 11
+	hlcoord 9, 10;11
 	ld de, wTempMonStatExp + 8
 	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
 	call PrintNum

@@ -1841,17 +1841,16 @@ _MeditateWithWhichMonText::
 _MeditationHiddenPowerText::
 	ntag "MAN:"
 	text "Hm…"
-
 	para "Yes…"
 	line "Can you feel it?"
-
 	para "@"
-	text_ram wStringBuffer3
-	text "'s hidden"
-	line "power is @"
 	text_ram wStringBuffer1
+	text "'s hidden"
+	line "power is "
+	text_ram wStringBuffer2
 	text "!"
 	done
+	
 _ComeMeditateAgainText::
 	ntag "MAN:"
 	text "You're welcome to"

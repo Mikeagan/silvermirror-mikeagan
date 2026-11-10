@@ -693,20 +693,26 @@ MrPsychic:
 	call OpenText
 	ld hl, MrPsychicStatExpText
 	call PrintText
-
+	call WaitButton
+	
 	predef PrintTempMonStatExp
 	; Ensure your engine has a layout predef to format/render the 10 bytes on screen
-
 	ld hl, MrPsychicFinishedReadingText
 	call PrintText
 	call WaitButton
-	
 	call CloseText ; Clear the Stat EXP display window cleanly
-	call OpenText  ; Open text final time for the farewell dialogue
-	jr .done       ; FIX: Bypasses falling into the .cancel route below
+	
+; Show selected party mon's Hidden Power (Screen 3) - not working disabled for now
+	call OpenText
+	;call GetCurNickname              ; Loads nickname into wStringBuffer1
+	;call GetHiddenPowerTypeToBuffer2 ; Loads Hidden Power type into wStringBuffer2
+	;ld hl, MeditationHiddenPowerText
+	;call PrintText
+	;call WaitButton
+	; Leave text box open so .cancel -> .done prints MrPsychicComeAgainText cleanly
 
 .cancel
-	ld hl, MrPsychicComeAgainText
+	ld hl, MrPsychicComeAgainText 
 	jr .done
 
 .egg
@@ -714,9 +720,83 @@ MrPsychic:
 
 .done
 	call PrintText
+	call WaitButton
+	call CloseText ; Clear the display window cleanly
+	ret
+	
+GetHiddenPowerTypeToBuffer2:
+	; Type index = ((AtkDV & 3) << 2) | (DefDV & 3)
+	ld a, [wTempMonDVs]
+	ld b, a
+	and %00110000      ; Isolate lower 2 bits of Attack DV (bits 4-5)
+	srl a
+	srl a              ; Shift into bits 2-3
+	ld c, a
+	ld a, b
+	and %00000011      ; Isolate lower 2 bits of Defense DV (bits 0-1)
+	or c               ; Combine into 0..15 index
+
+	; Look up pointer to type name string
+	ld hl, .HiddenPowerTypeNames
+	ld e, a
+	ld d, 0
+	add hl, de
+	add hl, de         ; 2 bytes per pointer
+	ld a, [hli]
+	ld d, [hl]         ; High byte of source into d
+	ld e, a            ; Low byte of source into e
+
+	; CopyName2 copies from de (source) to hl (destination)!
+	ld hl, wStringBuffer2
+	call CopyName2
 	ret
 
-; Text Pointer Maps
+.HiddenPowerTypeNames:
+	dw .Fighting
+	dw .Flying
+	dw .Poison
+	dw .Ground
+	dw .Rock
+	dw .Bug
+	dw .Ghost
+	dw .Steel
+	dw .Fire
+	dw .Water
+	dw .Grass
+	dw .Electric
+	dw .Psychic
+	dw .Ice
+	dw .Dragon
+	dw .Dark
+
+.Fighting: db "FIGHTING@"
+.Flying:   db "FLYING@"
+.Poison:   db "POISON@"
+.Ground:   db "GROUND@"
+.Rock:     db "ROCK@"
+.Bug:      db "BUG@"
+.Ghost:    db "GHOST@"
+.Steel:    db "STEEL@"
+.Fire:     db "FIRE@"
+.Water:    db "WATER@"
+.Grass:    db "GRASS@"
+.Electric: db "ELECTRIC@"
+.Psychic:  db "PSYCHIC@"
+.Ice:      db "ICE@"
+.Dragon:   db "DRAGON@"
+.Dark:     db "DARK@"
+	
+RevealHiddenPower:
+	call GetCurNickname
+	call GetHiddenPowerTypeToBuffer2
+	ld hl, MeditationHiddenPowerText
+	call PrintText
+	call WaitButton
+	ret
+
+; ----------------------------------------------------
+; Text Pointer Maps/Definitions
+; ----------------------------------------------------
 MrPsychicWhichMonText:
 	text_far _MrPsychicWhichMonText
 	text_end
@@ -745,53 +825,15 @@ MrPsychicEggText:
 	text_far _MrPsychicEggText
 	text_end
 
-RevealHiddenPower::
-	; 1. Ask the player to select a Pokémon from their party
-	ld hl, MeditateWithWhichMonText
-	call PrintText
-	farcall SelectMonFromParty
-	jr c, .cancel
-	
-	; 2. Safeguard against Egg selection
-	ld a, [wCurPartySpecies]
-	cp EGG
-	jr z, .egg
-
-	; 3. Load the selected Pokémon's nickname into the text buffer
-	call GetCurNickname
-	
-	; 4. Run the internal engine calculation to determine Hidden Power Type & Power.
-	; This fills wStringBuffer1 with the type name and calculates the power level.
-	predef HiddenPower_StringBuffer1
-
-	; 5. Print the evaluation result text screen
-	ld hl, MeditationHiddenPowerText
-	call PrintText
-	call WaitButton
-	jr .done             ; Prevent falling through to the cancel routine
-
-.cancel
-	ld hl, ComeMeditateAgainText
-	jr .done
-
-.egg
-	ld hl, MeditateEggText
-
-.done
-	call PrintText
-	ret
-
-
+MeditationHiddenPowerText:
+	text_far _MeditationHiddenPowerText
+	text_end
 ; ----------------------------------------------------
 ; Text Pointer Definitions
 ; ----------------------------------------------------
 
 MeditateWithWhichMonText:
 	text_far _MeditateWithWhichMonText
-	text_end
-
-MeditationHiddenPowerText:
-	text_far _MeditationHiddenPowerText
 	text_end
 
 ComeMeditateAgainText:
