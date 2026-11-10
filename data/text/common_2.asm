@@ -1846,8 +1846,8 @@ _MeditationHiddenPowerText::
 	para "@"
 	text_ram wStringBuffer1
 	text "'s hidden"
-	line "power is "
-	text_ram wStringBuffer2
+	line "power is @"
+	text_ram wStringBuffer4
 	text "!"
 	done
 	

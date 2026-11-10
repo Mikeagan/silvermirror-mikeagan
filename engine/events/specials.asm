@@ -703,13 +703,13 @@ MrPsychic:
 	call CloseText ; Clear the Stat EXP display window cleanly
 	
 ; Show selected party mon's Hidden Power (Screen 3) - not working disabled for now
+; Show selected party mon's Hidden Power (Screen 3)
 	call OpenText
-	;call GetCurNickname              ; Loads nickname into wStringBuffer1
-	;call GetHiddenPowerTypeToBuffer2 ; Loads Hidden Power type into wStringBuffer2
-	;ld hl, MeditationHiddenPowerText
-	;call PrintText
-	;call WaitButton
-	; Leave text box open so .cancel -> .done prints MrPsychicComeAgainText cleanly
+	call GetCurNickname
+	call GetHiddenPowerTypeToBuffer4
+	ld hl, MeditationHiddenPowerText
+	call PrintText
+	call WaitButton
 
 .cancel
 	ld hl, MrPsychicComeAgainText 
@@ -724,7 +724,7 @@ MrPsychic:
 	call CloseText ; Clear the display window cleanly
 	ret
 	
-GetHiddenPowerTypeToBuffer2:
+GetHiddenPowerTypeToBuffer4:
 	; Type index = ((AtkDV & 3) << 2) | (DefDV & 3)
 	ld a, [wTempMonDVs]
 	ld b, a
@@ -743,12 +743,17 @@ GetHiddenPowerTypeToBuffer2:
 	add hl, de
 	add hl, de         ; 2 bytes per pointer
 	ld a, [hli]
-	ld d, [hl]         ; High byte of source into d
-	ld e, a            ; Low byte of source into e
+	ld h, [hl]
+	ld l, a
 
-	; CopyName2 copies from de (source) to hl (destination)!
-	ld hl, wStringBuffer2
-	call CopyName2
+	; Explicitly copy bytes from hl into wStringBuffer4 until '@'
+	ld de, wStringBuffer4
+.copyLoop:
+	ld a, [hli]
+	ld [de], a
+	inc de
+	cp "@"
+	jr nz, .copyLoop
 	ret
 
 .HiddenPowerTypeNames:
@@ -788,7 +793,7 @@ GetHiddenPowerTypeToBuffer2:
 	
 RevealHiddenPower:
 	call GetCurNickname
-	call GetHiddenPowerTypeToBuffer2
+	call GetHiddenPowerTypeToBuffer4
 	ld hl, MeditationHiddenPowerText
 	call PrintText
 	call WaitButton
@@ -832,14 +837,14 @@ MeditationHiddenPowerText:
 ; Text Pointer Definitions
 ; ----------------------------------------------------
 
-MeditateWithWhichMonText:
-	text_far _MeditateWithWhichMonText
-	text_end
+;MeditateWithWhichMonText:
+;	text_far _MeditateWithWhichMonText
+;	text_end
 
-ComeMeditateAgainText:
-	text_far _ComeMeditateAgainText
-	text_end
+;ComeMeditateAgainText:
+;	text_far _ComeMeditateAgainText
+;	text_end
 
-MeditateEggText:
-	text_far _MeditateEggText
-	text_end
+;MeditateEggText:
+;	text_far _MeditateEggText
+;	text_end
