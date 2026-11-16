@@ -7721,6 +7721,28 @@ GiveExperiencePoints:
 	ld a, [hl]
 	cp LUCKY_EGG
 	call z, BoostExp
+
+; Optional EXP Boost (2x Multiplier via Options Menu)
+	ld a, [wOptions2]
+	bit EXP_BOOST_OPT, a
+	jr z, .no_optional_boost
+
+	ldh a, [hQuotient + 3]
+	sla a
+	ldh [hQuotient + 3], a
+	ldh a, [hQuotient + 2]
+	rl a
+	ldh [hQuotient + 2], a
+	ldh a, [hQuotient + 1]
+	rl a
+	ldh [hQuotient + 1], a
+
+.no_optional_boost
+	ldh a, [hQuotient + 3]
+	ld [wStringBuffer2 + 1], a
+	ldh a, [hQuotient + 2]
+	ld [wStringBuffer2], a
+	
 	ldh a, [hQuotient + 3]
 	ld [wStringBuffer2 + 1], a
 	ldh a, [hQuotient + 2]
