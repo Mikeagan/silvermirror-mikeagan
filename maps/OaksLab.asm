@@ -587,7 +587,7 @@ OaksAssistant2GiveExpAllText:
 
 OaksAssistant2AfterText:
 	ntag "AIDE:"
-	text "That EXP. ALL"
+	text "That EXP.ALL"
 	line "shares EXP. with"
 	cont "your whole party."
 
