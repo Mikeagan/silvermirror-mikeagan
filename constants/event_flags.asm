@@ -99,8 +99,8 @@
 	const EVENT_GOT_BERSERK_GENE
 	const EVENT_GOT_KANTO_LUCKY_EGG
 	const EVENT_GOT_WIDE_LENS
-	const_skip ;unused
-	const_skip ;unused
+	const EVENT_EXP_ALL_ACTIVE
+	const EVENT_GOT_EXP_ALL
 	const_skip ;unused
 ; used 25
 

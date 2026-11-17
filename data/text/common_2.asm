@@ -132,6 +132,15 @@ _ExpPointsText::
 	text_decimal wStringBuffer2, 2, 5
 	text " EXP. Points!"
 	prompt
+	
+_Text_TeamGainedExpAll::
+	text "The rest of your"
+	line "team gained EXP."
+
+	para "Points thanks to"
+	line "the EXP. ALL!"
+	prompt
+
 
 _GoMonText::
 	text "Go! @"

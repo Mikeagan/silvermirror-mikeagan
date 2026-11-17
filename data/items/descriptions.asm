@@ -169,7 +169,7 @@ ItemDescriptions:
 	dw RazorFangDesc
 	dw RazorClawDesc
 	dw WideLensDesc
-	dw TeruSama0Desc ; ITEM_A9
+	dw ExpAllDesc ; EXP ALL ; was ITEM_A9
 	assert_table_length NUM_ITEMS
 	dw TeruSama1Desc ; TM01
 	dw TeruSama1Desc ; TM02
@@ -1013,6 +1013,10 @@ CardKeyNDesc:
 WideLensDesc:
 	db   "Raises accuracy"
 	next "of attacks. (HOLD)@"
+
+ExpAllDesc:
+	db   "Shares EXP.POINTS"
+	next "with entire party.@"
 
 ;SurfMailDesc:
 ;	db   "LAPRAS-print MAIL."

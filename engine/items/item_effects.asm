@@ -182,7 +182,7 @@ ItemEffects:
 	dw NoEffect            ; RAZOR_FANG
 	dw NoEffect            ; RAZOR_CLAW
 	dw NoEffect            ; WIDE_LENS
-	dw NoEffect            ; ITEM_A9
+	dw ExpAllEffect        ; EXP_ALL; was ITEM_A9
 	assert_table_length NUM_ITEMS ; assert_table_length ITEM_B3
 ; The items past ITEM_B3 do not have effect entries:
 ; They all have the ITEMMENU_NOUSE attribute so they can't be used anyway.
@@ -1108,6 +1108,38 @@ EvoStoneEffect:
 	xor a
 	ld [wItemEffectSucceeded], a
 	ret
+	
+; New EXP ALL code
+ExpAllEffect:
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
+	jr nz, .turn_off
+
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, SET_FLAG
+	call EventFlagAction
+	ld hl, .TurnedOnText
+	jp PrintText
+
+.turn_off
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, RESET_FLAG
+	call EventFlagAction
+	ld hl, .TurnedOffText
+	jp PrintText
+
+.TurnedOnText:
+	text "Turned ON the"
+	line "EXP. ALL."
+	prompt
+
+.TurnedOffText:
+	text "Turned OFF the"
+	line "EXP. ALL."
+	prompt
 
 VitaminEffect:
 	ld b, PARTYMENUACTION_HEALING_ITEM
@@ -2944,4 +2976,103 @@ GetMthMoveOfCurrentMon:
 	ld c, a
 	ld b, 0
 	add hl, bc
+	ret
+
+EvenlyDivideExpAmongParticipants::
+; count number of battle participants
+	ld a, [wBattleParticipantsNotFainted]
+	ld b, a
+	ld c, PARTY_LENGTH
+	ld d, 0
+.count_loop
+	xor a
+	srl b
+	adc d
+	ld d, a
+	dec c
+	jr nz, .count_loop
+	cp 2
+	ret c
+
+	ld [wTempByteValue], a
+	ld hl, wEnemyMonBaseStats
+	ld c, wEnemyMonEnd - wEnemyMonBaseStats
+.base_stat_division_loop
+	xor a
+	ldh [hDividend + 0], a
+	ld a, [hl]
+	ldh [hDividend + 1], a
+	ld a, [wTempByteValue]
+	ldh [hDivisor], a
+	ld b, 2
+	call Divide
+	ldh a, [hQuotient + 3]
+	ld [hli], a
+	dec c
+	jr nz, .base_stat_division_loop
+	ret
+	
+_IsAnyMonHoldingExpShare::
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
+	jr z, .check_held
+	xor a
+	ret
+
+.check_held
+	ld a, [wPartyCount]
+	ld b, a
+	ld hl, wPartyMon1
+	ld c, 1
+	ld d, 0
+.loop
+	push hl
+	push bc
+	ld bc, MON_HP
+	add hl, bc
+	ld a, [hli]
+	or [hl]
+	pop bc
+	pop hl
+	jr z, .next
+
+	push hl
+	push bc
+	ld bc, MON_ITEM
+	add hl, bc
+	pop bc
+	ld a, [hl]
+	pop hl
+
+	cp EXP_SHARE
+	jr nz, .next
+	ld a, d
+	or c
+	ld d, a
+
+.next
+	sla c
+	push de
+	ld de, PARTYMON_STRUCT_LENGTH
+	add hl, de
+	pop de
+	dec b
+	jr nz, .loop
+
+	ld a, d
+	ld e, 0
+	ld b, PARTY_LENGTH
+.loop2
+	srl a
+	jr nc, .okay
+	inc e
+
+.okay
+	dec b
+	jr nz, .loop2
+	ld a, e
+	and a
 	ret

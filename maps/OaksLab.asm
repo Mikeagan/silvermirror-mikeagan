@@ -55,10 +55,18 @@ OakScript:
 	opentext
 	checkevent EVENT_GOT_POKEBALLS_FROM_OAK
 	iffalse .OakGiveBalls
+	checkevent EVENT_GOT_EXP_ALL
+	iffalse .RemindAide
 	writetext OakLabEvaluateDexText
 	promptbutton
 	special ProfOaksPCBoot
 	writetext OakLabOakGoodbyeText
+	waitbutton
+	closetext
+	end
+
+.RemindAide
+	writetext OaksLabOakTalkToAideText
 	waitbutton
 	closetext
 	end
@@ -507,6 +515,8 @@ DeliverOaksParcelScript:
 	playsound SFX_REGISTER_PHONE_NUMBER
 	waitsfx
 	promptbutton
+	writetext OaksLabOakTalkToAideText
+	promptbutton
 ;	closetext
 	writetext OaksLabOakTalkToMomText
 	waitbutton
@@ -548,6 +558,42 @@ OaksAssistantText:
 	ntag "AIDE:"
 	text "I study #MON as"
 	line "PROF.OAK's AIDE."
+	done
+
+OaksAssistant2Script:
+	faceplayer
+	opentext
+	checkevent EVENT_GOT_EXP_ALL
+	iftrue .GotExpAll
+	writetext OaksAssistant2GiveExpAllText
+	promptbutton
+	verbosegiveitem EXP_ALL
+	iffalse .BagFull
+	setevent EVENT_GOT_EXP_ALL
+	setevent EVENT_EXP_ALL_ACTIVE
+.GotExpAll:
+	writetext OaksAssistant2AfterText
+	waitbutton
+.BagFull:
+	closetext
+	end
+
+OaksAssistant2GiveExpAllText:
+	ntag "AIDE:"
+	text "PROF.OAK asked me"
+	line "to give you this"
+	cont "helpful device!"
+	done
+
+OaksAssistant2AfterText:
+	ntag "AIDE:"
+	text "That EXP. ALL"
+	line "shares EXP. with"
+	cont "your whole party."
+
+	para "You can turn it"
+	line "ON or OFF anytime"
+	cont "in your BAG!"
 	done
 
 ;OaksLabGirlScript:
@@ -1185,6 +1231,17 @@ OaksLabOakGivePhoneNumberText:
 GotOaksNumberText:
 	text "<PLAYER> got OAK's"
 	line "phone number."
+	done
+	
+OaksLabOakTalkToAideText:
+	ntag "OAK:"
+	text "Before you go,"
+	line "speak to my AIDE"
+	cont "on the right side."
+
+	para "He has a helpful"
+	line "device for your"
+	cont "journey!"
 	done
 
 OaksLabOakTalkToMomText:
@@ -2504,7 +2561,7 @@ endc
 ;	object_event  2,  3, SPRITE_BULBASAUR, SPRITEMOVEDATA_POKEMON, 0, 0, -1, -1, PAL_NPC_GREEN, OBJECTTYPE_SCRIPT, 0, OaksLabBulbasaur, EVENT_OAKS_LAB_BULBASAUR
 ;	object_event  2,  3, SPRITE_CHARMANDER, SPRITEMOVEDATA_POKEMON, 0, 0, -1, -1, PAL_NPC_RED, OBJECTTYPE_SCRIPT, 0, OaksLabCharmander, EVENT_OAKS_LAB_CHARMANDER
 ;	object_event  2,  3, SPRITE_SQUIRTLE, SPRITEMOVEDATA_POKEMON, 0, 0, -1, -1, PAL_NPC_BLUE, OBJECTTYPE_SCRIPT, 0, OaksLabSquirtle, EVENT_OAKS_LAB_SQUIRTLE
-	object_event  7, 10, SPRITE_SCIENTIST, SPRITEMOVEDATA_WALK_UP_DOWN, 0, 1, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksAssistantScript, -1
+	object_event  7, 10, SPRITE_SCIENTIST, SPRITEMOVEDATA_WALK_UP_DOWN, 0, 1, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksAssistant2Script, -1
 	object_event  2, 10, SPRITE_SCIENTIST, SPRITEMOVEDATA_WALK_LEFT_RIGHT, 1, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksAssistantScript, -1
 ;	object_event  1,  9, SPRITE_LASS, SPRITEMOVEDATA_WANDER, 1, 1, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, OaksLabGirlScript, -1
 ;

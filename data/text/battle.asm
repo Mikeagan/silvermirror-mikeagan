@@ -1541,3 +1541,4 @@ WokeUpOpponentText:
 ;	text "There is no time"
 ;	line "left today!"
 ;	done
+

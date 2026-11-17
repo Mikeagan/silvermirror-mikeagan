@@ -174,7 +174,7 @@
 	const RAZOR_FANG   ; a6
 	const RAZOR_CLAW   ; a7
 	const WIDE_LENS    ; a8
-	const ITEM_A9      ; a9
+	const EXP_ALL      ; a9
 DEF NUM_ITEMS EQU const_value - 1
 
 DEF __tmhm_value__ = 1
