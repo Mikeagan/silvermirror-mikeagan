@@ -169,6 +169,7 @@ ItemNames::
 	li "RAZOR CLAW"
 	li "WIDE LENS"
 	li "EXP.ALL"      ; ITEM_A9
+	li "BOOSTER CHIP"
 	assert_list_length NUM_ITEMS
 	li "TM01"
 	li "TM02"

@@ -170,6 +170,7 @@ ItemDescriptions:
 	dw RazorClawDesc
 	dw WideLensDesc
 	dw ExpAllDesc ; EXP ALL ; was ITEM_A9
+	dw BoosterChipDesc ;NEW BOOSTER CHIP
 	assert_table_length NUM_ITEMS
 	dw TeruSama1Desc ; TM01
 	dw TeruSama1Desc ; TM02
@@ -1017,6 +1018,10 @@ WideLensDesc:
 ExpAllDesc:
 	db   "Shares EXP.POINTS"
 	next "with entire party.@"
+	
+BoosterChipDesc:
+	db   "Boosts a #MON's"
+	next "EXP. gain forever.@"
 
 ;SurfMailDesc:
 ;	db   "LAPRAS-print MAIL."

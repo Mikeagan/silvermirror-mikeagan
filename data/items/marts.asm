@@ -178,14 +178,14 @@ MartEvolution1:
 ;MartCeladon5F1:
 ;Mart Goldenrod4F:
 MartVitamins1:
-	db 6 ; # items
+	db 7 ; # items
 	db PP_UP
 	db HP_UP
 	db PROTEIN
 	db IRON
 	db CALCIUM
 	db CARBOS
-;	db PP_UP
+	db BOOSTER_CHIP
 	db -1 ; end
 
 ;MartCeladon5F2:

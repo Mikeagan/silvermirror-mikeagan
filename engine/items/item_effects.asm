@@ -183,6 +183,7 @@ ItemEffects:
 	dw NoEffect            ; RAZOR_CLAW
 	dw NoEffect            ; WIDE_LENS
 	dw ExpAllEffect        ; EXP_ALL; was ITEM_A9
+	dw BoosterChipEffect   ; BOOSTER CHIP
 	assert_table_length NUM_ITEMS ; assert_table_length ITEM_B3
 ; The items past ITEM_B3 do not have effect entries:
 ; They all have the ITEMMENU_NOUSE attribute so they can't be used anyway.
@@ -3013,66 +3014,51 @@ EvenlyDivideExpAmongParticipants::
 	ret
 	
 _IsAnyMonHoldingExpShare::
-	ld de, EVENT_EXP_ALL_ACTIVE
-	ld b, CHECK_FLAG
-	call EventFlagAction
-	ld a, c
-	and a
-	jr z, .check_held
+	ld d, 0
 	xor a
 	ret
 
-.check_held
-	ld a, [wPartyCount]
-	ld b, a
-	ld hl, wPartyMon1
-	ld c, 1
-	ld d, 0
-.loop
-	push hl
-	push bc
-	ld bc, MON_HP
-	add hl, bc
-	ld a, [hli]
-	or [hl]
-	pop bc
-	pop hl
-	jr z, .next
+BoosterChipEffect:
+	ld b, PARTYMENUACTION_HEALING_ITEM
+	call UseItem_SelectMon
+	jp c, RareCandy_StatBooster_ExitMenu
 
-	push hl
-	push bc
-	ld bc, MON_ITEM
-	add hl, bc
-	pop bc
-	ld a, [hl]
-	pop hl
+; Block traded Pokemon (they already get boosted EXP)
+	ld a, MON_ID
+	call GetPartyParamLocation
+	ld a, [wPlayerID]
+	cp [hl]
+	jp nz, NoEffectMessage
+	inc hl
+	ld a, [wPlayerID + 1]
+	cp [hl]
+	jp nz, NoEffectMessage
 
-	cp EXP_SHARE
-	jr nz, .next
-	ld a, d
-	or c
-	ld d, a
+; Check bit 6 of MON_CAUGHTDATA + 1 (unused bit)
+	ld a, MON_CAUGHTDATA + 1
+	call GetPartyParamLocation
+	bit 6, [hl]
+	jp nz, NoEffectMessage
 
-.next
-	sla c
-	push de
-	ld de, PARTYMON_STRUCT_LENGTH
-	add hl, de
-	pop de
-	dec b
-	jr nz, .loop
+	set 6, [hl]
 
-	ld a, d
-	ld e, 0
-	ld b, PARTY_LENGTH
-.loop2
-	srl a
-	jr nc, .okay
-	inc e
+; Load selected Pokemon's nickname into wStringBuffer1
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMonNicknames
+	call GetNickname
 
-.okay
-	dec b
-	jr nz, .loop2
-	ld a, e
-	and a
-	ret
+	call Play_SFX_FULL_HEAL
+
+	ld hl, .UsedBoosterChipText
+	call PrintText
+
+	ld c, HAPPINESS_USEDITEM
+	farcall ChangeHappiness
+
+	jp UseDisposableItem
+
+.UsedBoosterChipText:
+	text_ram wStringBuffer1
+	text "'s EXP."
+	line "gain was boosted!"
+	prompt

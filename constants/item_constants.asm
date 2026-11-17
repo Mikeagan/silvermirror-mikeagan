@@ -175,6 +175,7 @@
 	const RAZOR_CLAW   ; a7
 	const WIDE_LENS    ; a8
 	const EXP_ALL      ; a9
+	const BOOSTER_CHIP ; ADD BOOSTER CHIP
 DEF NUM_ITEMS EQU const_value - 1
 
 DEF __tmhm_value__ = 1

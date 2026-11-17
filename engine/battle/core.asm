@@ -7555,7 +7555,7 @@ GiveExperiencePoints:
 	and a
 	ret z
 
-	farcall EvenlyDivideExpAmongParticipants ;call .EvenlyDivideExpAmongParticipants
+	;farcall EvenlyDivideExpAmongParticipants ;call .EvenlyDivideExpAmongParticipants
 	xor a
 	ld [wCurPartyMon], a
 	ld bc, wPartyMon1Species
@@ -7577,15 +7577,32 @@ GiveExperiencePoints:
 	ld a, c
 	and a
 	jr nz, .participant_ok
+
+; Check if EXP. ALL is active
 	ld de, EVENT_EXP_ALL_ACTIVE
 	ld b, CHECK_FLAG
 	call EventFlagAction
 	ld a, c
-	pop bc
 	and a
-	jp z, .next_mon
+	jr nz, .bench_exp
+
+; Otherwise, check if this mon is holding EXP_SHARE
+	pop bc
+	push bc
+	ld hl, MON_ITEM
+	add hl, bc
+	ld a, [hl]
+	cp EXP_SHARE
+	pop bc
+	jp nz, .next_mon
 	ld a, 1
 	jr .set_bench_flag
+
+.bench_exp
+	pop bc
+	ld a, 1
+	jr .set_bench_flag
+	
 .participant_ok
 	pop bc
 	xor a
@@ -7668,6 +7685,12 @@ GiveExperiencePoints:
 	inc hl
 	ld a, [wPlayerID + 1]
 	cp [hl]
+	jr nz, .boosted
+
+; Check if Booster Chip was used on this Pokemon
+	ld hl, MON_CAUGHTDATA + 1
+	add hl, bc
+	bit 6, [hl]
 	ld a, 0
 	jr z, .no_boost
 
@@ -7737,8 +7760,16 @@ GiveExperiencePoints:
 
 	ld a, [wTempByteValue]
 	and a
+	jr z, .show_exp_text
+
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
 	jr nz, .skip_bench_exp_text
 
+.show_exp_text
 	ld a, [wCurPartyMon]
 	ld hl, wPartyMonNicknames
 	call GetNickname
