@@ -7688,9 +7688,9 @@ GiveExperiencePoints:
 	jr nz, .boosted
 
 ; Check if Booster Chip was used on this Pokemon
-	ld hl, MON_CAUGHTDATA + 1
+	ld hl, MON_POKERUS
 	add hl, bc
-	bit 6, [hl]
+	bit 3, [hl]
 	ld a, 0
 	jr z, .no_boost
 

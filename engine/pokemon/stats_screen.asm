@@ -583,7 +583,7 @@ LoadPinkPage:
 
 	ld a, [wTempMonPokerusStatus]
 	ld b, a
-	and $f
+	and $7
 	jr nz, .HasPokerus
 	ld a, b
 	and $f0
@@ -660,6 +660,7 @@ LoadPinkPage:
 	ld de, .ExpPointStr
 	hlcoord 10, 9
 	call PlaceString
+	call PlaceExpBoostMarker
 	hlcoord 17, 14
 	call .PrintNextLevel
 	hlcoord 13, 10
@@ -810,6 +811,26 @@ PrintMonTypeTiles:
 	ld [hl], $5f
 	ret
 
+PlaceExpBoostMarker:
+; Check Booster Chip bit (bit 3 of wTempMonPokerusStatus)
+	ld a, [wTempMonPokerusStatus]
+	bit 3, a
+	jr nz, .draw_marker
+
+; Check if Pokemon is traded (wTempMonID != wPlayerID)
+	ld hl, wTempMonID
+	ld a, [wPlayerID]
+	cp [hl]
+	jr nz, .draw_marker
+	inc hl
+	ld a, [wPlayerID + 1]
+	cp [hl]
+	ret z ; normal EXP gain, draw nothing
+
+.draw_marker
+	hlcoord 11, 10
+	ld [hl], "▲" ; or "▲" / "<STAR>"
+	ret
 
 LoadGreenPage:
 	ld de, .Item

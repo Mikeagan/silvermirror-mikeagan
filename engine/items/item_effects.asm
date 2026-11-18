@@ -3034,13 +3034,13 @@ BoosterChipEffect:
 	cp [hl]
 	jp nz, NoEffectMessage
 
-; Check bit 6 of MON_CAUGHTDATA + 1 (unused bit)
-	ld a, MON_CAUGHTDATA + 1
+; Check bit 3 of MON_POKERUS (unused bit, saved in PC boxes)
+	ld a, MON_POKERUS
 	call GetPartyParamLocation
-	bit 6, [hl]
+	bit 3, [hl]
 	jp nz, NoEffectMessage
 
-	set 6, [hl]
+	set 3, [hl]
 
 ; Load selected Pokemon's nickname into wStringBuffer1
 	ld a, [wCurPartyMon]
