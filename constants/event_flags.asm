@@ -981,6 +981,7 @@
 	const EVENT_CERULEAN_CAVE_2F_HIDDEN_PP_UP              ;done
 	const EVENT_CERULEAN_CAVE_B1F_HIDDEN_ULTRA_BALL        ;done
 	const EVENT_MT_MOON_SQUARE_HIDDEN_MOON_STONE           ;done (respawns)
+	const EVENT_CELADON_CAFE_HIDDEN_LEFTOVERS              ;new in silvermirror
 ; used 67
 ; running total 967
 ;

@@ -156,13 +156,20 @@ PokecenterNurseScript:
 
 .done
 	farwritetext NurseGoodbyeText
+	turnobject LAST_TALKED, UP
+	pause 10
+	turnobject LAST_TALKED, DOWN
+	waitbutton
+	closetext
+	end
+
 .bow
 	turnobject LAST_TALKED, UP
 	pause 10
 	turnobject LAST_TALKED, DOWN
-;	pause 10
 	waitbutton
 	closetext
+	turnobject PLAYER, DOWN
 	end
 
 .pokerus
@@ -182,6 +189,7 @@ PokecenterNurseScript:
 .pokerus_done
 	setflag ENGINE_CAUGHT_POKERUS
 	specialphonecall SPECIALCALL_POKERUS
+	turnobject PLAYER, DOWN
 	end
 
 DifficultBookshelfScript:

@@ -95,6 +95,9 @@ EatathonContestPosterText:
 	roll "all for free!"
 	done
 
+CeladonCafeHiddenLeftovers:
+	hiddenitem LEFTOVERS, EVENT_CELADON_CAFE_HIDDEN_LEFTOVERS
+	
 CeladonCafe_MapEvents:
 	db 0, 0 ; filler
 
@@ -106,6 +109,7 @@ CeladonCafe_MapEvents:
 
 	def_bg_events
 	bg_event  3,  0, BGEVENT_READ, EatathonContestPoster
+	bg_event 5, 5, BGEVENT_ITEM, CeladonCafeHiddenLeftovers
 
 	def_object_events
 	object_event  8,  4, SPRITE_CHEF, SPRITEMOVEDATA_WALK_LEFT_RIGHT, 1, 1, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, CeladonCafeChef, -1
@@ -113,3 +117,4 @@ CeladonCafe_MapEvents:
 	object_event  1,  4, SPRITE_POKEFAN_M, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, CeladonCafeMan, -1
 	object_event  5,  3, SPRITE_FISHER, SPRITEMOVEDATA_STANDING_RIGHT, 0, 0, -1, -1, 0, OBJECTTYPE_SCRIPT, 0, CeladonCafeFisher, -1
 	object_event  0,  1, SPRITE_GYM_GUIDE, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, -1, PAL_NPC_BROWN, OBJECTTYPE_SCRIPT, 0, CeladonCafeGamblerScript, -1
+	
