@@ -36,7 +36,7 @@ PlaceMenuItemQuantity:
 	ld a, [wItemAttributeValue]
 	pop hl
 	and a
-	jr nz, .done
+	jr nz, .check_registered
 	ld de, $15
 	add hl, de
 	ld [hl], "×"
@@ -44,9 +44,36 @@ PlaceMenuItemQuantity:
 	ld de, wMenuSelectionQuantity
 	lb bc, 1, 2
 	call PrintNum
-
-.done
 	ret
+
+.check_registered
+	ld a, [wCurItem]
+	ld b, a
+	ld a, [wRegisteredItem]
+	cp b
+	jr z, .reg1
+	ld a, [wRegisteredItem2]
+	cp b
+	ret nz
+	ld de, $10
+	add hl, de
+	ld de, .Reg2String
+	call PlaceString
+	ret
+
+.reg1
+	ld de, $11
+	add hl, de
+	ld de, .Reg1String
+	call PlaceString
+	ret
+
+.Reg1String:
+	db "TAP.SEL@"
+
+.Reg2String:
+	db "HOLD.SEL@"
+
 
 PlaceMoneyTopRight:
 	ld hl, MoneyTopRightMenuHeader

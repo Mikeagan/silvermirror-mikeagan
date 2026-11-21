@@ -1,3 +1,69 @@
+DEF SELECT_HOLD_FRAMES EQU 25 ; ~0.4 seconds at 60 FPS
+
+CheckSelectHold::
+	ldh a, [hJoyDown]
+	and SELECT
+	jr z, .released
+
+	; SELECT is being held down
+	ld a, [wSelectHoldCounter]
+	cp $ff
+	jr z, .idle ; Already triggered hold action; wait until player releases SELECT
+
+	inc a
+	ld [wSelectHoldCounter], a
+	cp SELECT_HOLD_FRAMES
+	jr c, .idle
+
+	; Hold threshold reached -> trigger Slot 2 (fall back to Slot 1 if empty)
+	ld a, $ff
+	ld [wSelectHoldCounter], a
+	ld a, [wRegisteredItem2]
+	and a
+	jr z, .use_slot1
+	ld a, 2
+	ld [wScriptVar], a
+	scf
+	ret
+
+.released
+	ld a, [wSelectHoldCounter]
+	and a
+	ret z ; SELECT wasn't held (carry is cleared by `and a`)
+
+	ld c, a
+	xor a
+	ld [wSelectHoldCounter], a
+	ld a, c
+	cp $ff
+	ret z ; Hold action already fired; ignore release (carry cleared by `cp $ff`)
+
+.use_slot1
+	; Short tap -> trigger Slot 1
+	ld a, 1
+	ld [wScriptVar], a
+	scf
+	ret
+
+.idle
+	and a
+	ret
+
+SelectMenu2::
+	ld a, [wRegisteredItem2]
+	ld hl, wKeyItems
+	ld de, 1
+	call IsInArray
+	jr nc, .NotRegistered2
+	ld a, [wRegisteredItem2]
+	ld [wCurItem], a
+	jp UseRegisteredItem
+
+.NotRegistered2:
+	xor a
+	ld [wRegisteredItem2], a
+	jp SelectMenu.NotRegistered
+
 SelectMenu::
 	call CheckRegisteredItem
 	jr c, .NotRegistered

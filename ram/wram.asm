@@ -127,7 +127,8 @@ wDebugFlags:: db
 wGameLogicPaused:: db
 wSpriteUpdatesEnabled:: db
 
-wUnusedScriptByte:: db
+wUnusedScriptByte::
+wSelectHoldCounter:: db		; 2nd registered item (hold select)
 
 wMapTimeOfDay:: db
 
@@ -3102,7 +3103,7 @@ wPokegearFlags::
 	db
 wRadioTuningKnob:: db
 wLastDexMode:: db
-	ds 1
+wRegisteredItem2:: db ; <--- Replaces the `ds 1` padding right before wWhichRegisteredItem
 wWhichRegisteredItem:: db
 wRegisteredItem:: db
 
