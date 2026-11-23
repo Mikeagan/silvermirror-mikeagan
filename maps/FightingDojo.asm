@@ -238,8 +238,29 @@ FightingDojoKarateMasterScript:
 	setevent EVENT_BEAT_BLACKBELT_MASTER_REMATCH
 	opentext
 .OfferSecondPokemon
-	setscene SCENE_FIGHTINGDOJO_NOOP
 	writetext KarateMasterOffersSecondPokemonText
+	yesorno
+	iffalse .DeclinedHitmontop
+	readvar VAR_PARTYCOUNT
+	ifequal PARTY_LENGTH, .NoRoomForHitmontop
+	setevent EVENT_GOT_POKEMON_FROM_DOJO_2
+	getmonname STRING_BUFFER_3, HITMONTOP
+	writetext FightingDojoReceivedPokemonText
+	playsound SFX_CAUGHT_MON
+	waitsfx
+	promptbutton
+	givepoke HITMONTOP, 30
+	closetext
+	end
+	
+.DeclinedHitmontop
+	writetext KarateMasterDeclinedRematchText
+	waitbutton
+	closetext
+	end
+
+.NoRoomForHitmontop
+	farwritetext _NoRoomInPartyText
 	waitbutton
 	closetext
 	end
@@ -359,12 +380,14 @@ KarateMasterOffersSecondPokemonText:
 	cont "To get stronger!"
 
 	para "Please, take this"
-	line "other FIGHTING"
-	cont "#MON."
+	line "HITMONTOP as well."
 
 	para "I know it will"
 	line "grow strong under"
 	cont "your care!"
+	
+	para "Will you take it"
+	line "with you?"
 	done
 
 KarateMasterTrainingText:
@@ -429,7 +452,7 @@ KarateMasterOffersPokemonText:
 	roll "well in your care."
 
 	para "If you would like,"
-	line "please, take one."
+	line "please, take them."
 	done
 
 ;	para "If you would like"
@@ -439,9 +462,6 @@ KarateMasterOffersPokemonText:
 ;	done
 
 FightingDojoHitmonlee:
-;	checkevent EVENT_GOT_POKEMON_FROM_DOJO
-;;	iftrue FightingDojoDontGetGreedyScript
-;	iftrue .AlreadyGotHitmonchan
 	refreshscreen
 	pokepic HITMONLEE
 	cry HITMONLEE
@@ -453,9 +473,8 @@ FightingDojoHitmonlee:
 	iffalse .NotHitmonlee
 	readvar VAR_PARTYCOUNT
 	ifequal PARTY_LENGTH, NoRoomForFightingPokemon
-	checkevent EVENT_GOT_POKEMON_FROM_DOJO
-	iftrue .AlreadyGotHitmonchan
 	disappear FIGHTINGDOJO_HITMONLEE_POKE_BALL
+	setevent EVENT_GOT_HITMONLEE_FROM_DOJO
 	setevent EVENT_GOT_POKEMON_FROM_DOJO
 	getmonname STRING_BUFFER_3, HITMONLEE
 	writetext FightingDojoReceivedPokemonText
@@ -467,21 +486,6 @@ FightingDojoHitmonlee:
 	closetext
 	end
 
-.AlreadyGotHitmonchan
-	checkevent EVENT_BEAT_BLACKBELT_MASTER_REMATCH
-	iffalse FightingDojoDontGetGreedyScript
-	disappear FIGHTINGDOJO_HITMONLEE_POKE_BALL
-	setevent EVENT_GOT_POKEMON_FROM_DOJO_2
-	getmonname STRING_BUFFER_3, HITMONLEE
-	opentext
-	writetext FightingDojoReceivedPokemonText
-	playsound SFX_CAUGHT_MON
-	waitsfx
-	promptbutton
-	givepoke HITMONLEE, 50
-	closetext
-	end
-
 FightingDojoTakeHitmonleeText:
 	text "You want the"
 	line "hard kicking"
@@ -489,9 +493,6 @@ FightingDojoTakeHitmonleeText:
 	done
 
 FightingDojoHitmonchan:
-;	checkevent EVENT_GOT_POKEMON_FROM_DOJO
-;;	iftrue FightingDojoDontGetGreedyScript
-;	iftrue .AlreadyGotHitmonlee
 	refreshscreen
 	pokepic HITMONCHAN
 	cry HITMONCHAN
@@ -503,9 +504,8 @@ FightingDojoHitmonchan:
 	iffalse .NotHitmonchan
 	readvar VAR_PARTYCOUNT
 	ifequal PARTY_LENGTH, NoRoomForFightingPokemon
-	checkevent EVENT_GOT_POKEMON_FROM_DOJO
-	iftrue .AlreadyGotHitmonlee
 	disappear FIGHTINGDOJO_HITMONCHAN_POKE_BALL
+	setevent EVENT_GOT_HITMONCHAN_FROM_DOJO
 	setevent EVENT_GOT_POKEMON_FROM_DOJO
 	getmonname STRING_BUFFER_3, HITMONCHAN
 	writetext FightingDojoReceivedPokemonText
@@ -514,21 +514,6 @@ FightingDojoHitmonchan:
 	promptbutton
 	givepoke HITMONCHAN, 30
 .NotHitmonchan
-	closetext
-	end
-
-.AlreadyGotHitmonlee
-	checkevent EVENT_BEAT_BLACKBELT_MASTER_REMATCH
-	iffalse FightingDojoDontGetGreedyScript
-	disappear FIGHTINGDOJO_HITMONCHAN_POKE_BALL
-	setevent EVENT_GOT_POKEMON_FROM_DOJO_2
-	getmonname STRING_BUFFER_3, HITMONCHAN
-	opentext
-	writetext FightingDojoReceivedPokemonText
-	playsound SFX_CAUGHT_MON
-	waitsfx
-	promptbutton
-	givepoke HITMONCHAN, 50
 	closetext
 	end
 
@@ -543,14 +528,6 @@ FightingDojoReceivedPokemonText:
 	line "@"
 	text_ram wStringBuffer3
 	text "!"
-	done
-
-FightingDojoDontGetGreedyScript:
-	jumptext FightingDojoDontGetGreedyText
-
-FightingDojoDontGetGreedyText:
-	text "Better not get"
-	line "greedy…"
 	done
 
 NoRoomForFightingPokemon:
