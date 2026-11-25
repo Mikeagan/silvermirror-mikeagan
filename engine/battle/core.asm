@@ -90,6 +90,7 @@ DoBattle:
 	call SlideBattlePicOut
 	call LoadTilemapToTempTilemap
 	call ResetBattleParticipants
+  call CheckNuggetPokerusOnBattleStart
 	call InitBattleMon
 	call ResetPlayerStatLevels
 	call SendOutMonText
@@ -117,6 +118,74 @@ DoBattle:
 
 .not_linked_2
 	jp BattleTurn
+
+CheckNuggetPokerusOnBattleStart:
+	; Skip if linked or in the Battle Tower
+	ld a, [wLinkMode]
+	and a
+	ret nz
+	ld a, [wInBattleTowerBattle]
+	bit 0, a
+	ret nz
+
+	ld a, [wPartyCount]
+	and a
+	ret z
+
+	ld b, a ; Loop counter (party size)
+	ld c, 0 ; Current party slot (0-5)
+
+.loop
+	push bc
+
+	; Skip Eggs
+	ld a, c
+	ld hl, wPartySpecies
+	ld e, a
+	ld d, 0
+	add hl, de
+	ld a, [hl]
+	cp EGG
+	jr z, .next
+
+	; Point hl to wPartyMonXItem
+	ld a, c
+	ld hl, wPartyMon1Item
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+
+	; Check if holding NUGGET
+	ld a, [hl]
+	cp NUGGET
+	jr nz, .next
+
+	; Point hl to wPartyMonXPokerus
+	ld bc, MON_POKERUS - MON_ITEM
+	add hl, bc
+
+	; Skip if already infected, cured, or has bit 3 Booster Chip flag set
+	ld a, [hl]
+	and a
+	jr nz, .next
+
+  ; Probability roll (BattleRandom returns 0–255)
+	; cp 3  = ~1.17% (3/256)
+	; cp 13 = ~5.08% (13/256)
+	; cp 26 = ~10.16% (26/256)
+	call BattleRandom
+	cp 26
+	jr nc, .next
+
+	; Infect with active Pokérus (Strain 1, 3 days duration = $13)
+	ld a, $13
+	ld [hl], a
+
+.next
+	pop bc
+	inc c
+	dec b
+	jr nz, .loop
+	ret
 
 SafariBattleTurn:
 .loop
