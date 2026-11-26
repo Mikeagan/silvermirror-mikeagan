@@ -202,7 +202,8 @@ _MobileBattleRemainingTimeText::
 	done
 
 _WouldYouLikeToSaveTheGameText::
-	text {GAME_VERSION}
+	ntag "S.MIRROR:{SM_GAME_VERSION}"
+	text "MIKEAGAN:{GAME_VERSION}"
 	line "Save the game?"
 	done
 

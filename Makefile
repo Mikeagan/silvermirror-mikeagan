@@ -2,6 +2,11 @@ roms := \
 	silvermirror.gbc \
 	silvermirror_debug.gbc
 patches := silvermirror.patch
+SM_VER    := $(shell grep -E 'SM_GAME_VERSION' version.asm | cut -d'"' -f2)
+MOD_VER   := $(shell grep -E 'GAME_VERSION' version.asm | grep -v 'SM_' | cut -d'"' -f2)
+BASE_ROM  := baserom_crystal11.gbc
+NAMED_ROM := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).gbc
+NAMED_BPS := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).bps
 
 rom_obj := \
 	audio.o \
@@ -85,7 +90,9 @@ tidy:
 	      $(silvermirror_vc_obj) \
 	      $(silvermirror_debug_obj) \
 	      rgbdscheck.o
+	rm -f "Pokemon Silver Mirror "*.gbc "Pokemon Silver Mirror "*.bps
 	$(MAKE) clean -C tools/
+
 
 compare: $(roms) $(patches)
 	@$(SHA1) -c roms.sha1
@@ -145,6 +152,15 @@ silvermirror_vc_opt    = -Cjv -t PM_CRYSTAL -i BYTE -n 1 -k 01 -l 0x33 -m 0x10 -
 	$(RGBLINK) -n $*.sym -m $*.map -l layout.link -o $@ $(filter %.o,$^)
 	$(RGBFIX) $($*_opt) $@
 	tools/stadium $@
+	@if [ "$@" = "silvermirror.gbc" ]; then \
+		cp -f "$@" "$(NAMED_ROM)"; \
+				if [ -f "$(BASE_ROM)" ]; then \
+			tools/flips.exe --create --bps "$(BASE_ROM)" "$@" "$(NAMED_BPS)"; \
+		else \
+			echo "Note: $(BASE_ROM) not found; skipping .bps patch creation."; \
+		fi; \
+	fi
+
 
 
 ### LZ compression rules
