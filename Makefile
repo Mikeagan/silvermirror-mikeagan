@@ -51,7 +51,7 @@ RGBLINK ?= $(RGBDS)rgblink
 ### Build targets
 
 .SUFFIXES:
-.PHONY: all silvermirror debug clean tidy compare tools
+.PHONY: all silvermirror debug clean tidy compare tools bump upstream
 .SECONDEXPANSION:
 .PRECIOUS:
 .SECONDARY:
@@ -100,6 +100,24 @@ compare: $(roms) $(patches)
 tools:
 	$(MAKE) -C tools/
 
+bump:
+	@awk -F'"' '/DEF GAME_VERSION/ && !/SM_GAME_VERSION/ { \
+		new_ver = $$2 + 1; \
+		print "DEF GAME_VERSION    EQUS \"\\\"" new_ver "\\\"\""; \
+		next \
+	} { print }' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
+	@grep "DEF GAME_VERSION" version.asm
+	
+upstream:
+	@if [ -z "$(VER)" ]; then \
+		echo "Usage: make upstream VER=1.3.0"; \
+		exit 1; \
+	fi
+	@awk -v ver="$(VER)" '/DEF SM_GAME_VERSION/ { \
+		print "DEF SM_GAME_VERSION EQUS \"\\\"" ver "\\\"\""; \
+		next \
+	} { print }' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
+	@grep "DEF SM_GAME_VERSION" version.asm
 
 RGBASMFLAGS = -hL -Q8 -P includes.asm -Weverything -Wnumeric-string=2 -Wtruncation=1
 # Create a sym/map for debug purposes if `make` run with `DEBUG=1`
@@ -119,7 +137,7 @@ rgbdscheck.o: rgbdscheck.asm
 
 # Build tools when building the rom.
 # This has to happen before the rules are processed, since that's when scan_includes is run.
-ifeq (,$(filter clean tidy tools,$(MAKECMDGOALS)))
+ifeq (,$(filter clean tidy tools bump upstream,$(MAKECMDGOALS)))
 
 $(info $(shell $(MAKE) -C tools))
 
