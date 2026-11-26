@@ -202,8 +202,8 @@ _MobileBattleRemainingTimeText::
 	done
 
 _WouldYouLikeToSaveTheGameText::
-	text "Would you like to"
-	line "save the game?"
+	text {GAME_VERSION}
+	line "Save the game?"
 	done
 
 _SavedTheGameText::
