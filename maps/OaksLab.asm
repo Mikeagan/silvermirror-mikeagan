@@ -552,6 +552,8 @@ OaksAssistantText:
 OaksAssistant2Script:
 	faceplayer
 	opentext
+	readvar VAR_PARTYCOUNT
+	ifequal 0, .NoPokemon
 	writetext OaksAssistant2IntroText
 	yesorno
 	iffalse .Declined
@@ -563,32 +565,32 @@ OaksAssistant2Script:
 
 	getmonname STRING_BUFFER_3, USE_SCRIPT_VAR
 	callasm ShowTempMonDVsAsm
+	callasm CheckHasLowDVsAsm
+	iffalse .AlreadySolid
+
 	writetext OaksAssistant2ConfirmText
 	yesorno
 	iffalse .Declined
 	callasm RerollLowDVsAsm
-	iffalse .AlreadyGood
 	callasm RecalcAndHealSelectedPartyMon
 	playsound SFX_DEX_FANFARE_50_79
 	waitsfx
 	callasm ShowTempMonDVsAsm
+	callasm CheckAlreadyMaxDVsAsm
+	iftrue .AlreadyMaxed
 	writetext OaksAssistant2DoneText
-	waitbutton
-	closetext
-	end
+	yesorno
+	iffalse .Declined
+	sjump .DoMaxDVs
 
-.IsEgg
-	writetext OaksAssistant2EggText
-	waitbutton
-	closetext
-	end
-
-.AlreadyGood
+.AlreadySolid:
 	callasm CheckAlreadyMaxDVsAsm
 	iftrue .AlreadyMaxed
 	writetext OaksAssistant2OfferPerfectText
 	yesorno
 	iffalse .Declined
+
+.DoMaxDVs:
 	callasm MaxSelectedMonDVsAsm
 	callasm RecalcAndHealSelectedPartyMon
 	playsound SFX_DEX_FANFARE_50_79
@@ -599,17 +601,30 @@ OaksAssistant2Script:
 	closetext
 	end
 
-.AlreadyMaxed
+.AlreadyMaxed:
 	writetext OaksAssistant2AlreadyMaxedText
 	waitbutton
 	closetext
 	end
 
-.Declined
+.IsEgg:
+	writetext OaksAssistant2EggText
+	waitbutton
+	closetext
+	end
+
+.NoPokemon:
+	writetext OaksAssistant2NoPokemonText
+	waitbutton
+	closetext
+	end
+
+.Declined:
 	writetext OaksAssistant2DeclinedText
 	waitbutton
 	closetext
 	end
+
 
 ShowTempMonDVsAsm:
 	farcall LoadFontsBattleExtra
@@ -948,6 +963,67 @@ RerollLowDVsAsm:
 	add 11 ; 11, 13, or 15
 	ret
 
+CheckHasLowDVsAsm:
+	ld a, [wTempMonDVs]
+	ld d, a ; Attack (upper nibble), Defense (lower nibble)
+	ld a, [wTempMonDVs + 1]
+	ld e, a ; Speed (upper nibble), Special (lower nibble)
+
+	; Check Attack < 10
+	ld a, d
+	and $f0
+	cp $a0
+	jr c, .has_low
+
+	; Check Defense < 10
+	ld a, d
+	and $0f
+	cp 10
+	jr c, .has_low
+
+	; Check Speed < 10
+	ld a, e
+	and $f0
+	cp $a0
+	jr c, .has_low
+
+	; Check Special < 10
+	ld a, e
+	and $0f
+	cp 10
+	jr c, .has_low
+
+	; Check derived HP DV < 10
+	xor a
+	bit 4, d
+	jr z, .hp_no8
+	or 8
+.hp_no8
+	bit 0, d
+	jr z, .hp_no4
+	or 4
+.hp_no4
+	bit 4, e
+	jr z, .hp_no2
+	or 2
+.hp_no2
+	bit 0, e
+	jr z, .hp_no1
+	or 1
+.hp_no1
+	cp 10
+	jr c, .has_low
+
+	; All 5 DVs (HP, Atk, Def, Spd, Spc) are >= 10
+	xor a
+	ld [wScriptVar], a
+	ret
+
+.has_low
+	ld a, 1
+	ld [wScriptVar], a
+	ret
+
 CheckAlreadyMaxDVsAsm:
 	xor a
 	ld [wScriptVar], a
@@ -984,18 +1060,29 @@ MaxSelectedMonDVsAsm:
 	ld [wTempMonDVs + 1], a
 	ret
 
+OaksAssistant2NoPokemonText:
+	ntag "AIDE:"
+	text "I study #MON"
+	line "genetics for"
+	cont "PROF.OAK!"
+
+	para "Come back once"
+	line "you have a #MON"
+	cont "with you!"
+	done
+
 OaksAssistant2IntroText:
 	ntag "AIDE:"
 	text "I study #MON"
 	line "genetics for"
 	cont "PROF.OAK!"
 
-	para "I can boost any"
-	line "weak traits on"
-	cont "your #MON."
+	para "I can examine your"
+	line "#MON and boost"
+	cont "its hidden traits."
 
 	para "Want me to"
-	line "examine one?"
+	line "check one?"
 	done
 
 OaksAssistant2WhichMonText:
@@ -1007,22 +1094,25 @@ OaksAssistant2WhichMonText:
 OaksAssistant2EggText:
 	ntag "AIDE:"
 	text "That's an EGG!"
-	line "Wait until it"
-	cont "hatches first."
+	line "Bring it back"
+	cont "once it hatches."
 	done
 
 OaksAssistant2ConfirmText:
 	ntag "AIDE:"
-	text "Reroll any low"
-	line "potential stats on"
-	cont "@"
+	text "@"
 	text_ram wStringBuffer3
-	text " to"
-	cont "at least 10?"
+	text " has"
+	line "some low potential"
+	cont "stats."
 
-	para "Note: Changing DVs"
-	line "may also change"
-	cont "its GENDER!"
+	para "Reroll its weak"
+	line "DVs to at least"
+	cont "10?"
+
+	para "Note: This may"
+	line "also change its"
+	cont "GENDER!"
 	done
 
 OaksAssistant2DoneText:
@@ -1032,15 +1122,22 @@ OaksAssistant2DoneText:
 	text_ram wStringBuffer3
 	text "'s weak"
 	cont "traits improved!"
-	done
 
-OaksAssistant2AlreadyGoodText:
-	ntag "AIDE:"
-	text "@"
+	para "I can also push"
+	line "all of its DVs to"
+	cont "the absolute peak"
+	cont "of 15, though its"
+	cont "HIDDEN POWER will"
+	cont "become DARK."
+
+	para "It will also"
+	line "become SHINY and"
+	cont "FEMALE (if able)."
+
+	para "Maximize all of"
+	line "@"
 	text_ram wStringBuffer3
-	text "'s"
-	line "genetics are"
-	cont "already solid!"
+	text "'s DVs?"
 	done
 
 OaksAssistant2OfferPerfectText:
@@ -1051,11 +1148,11 @@ OaksAssistant2OfferPerfectText:
 	line "genetics are"
 	cont "already solid!"
 
-	para "I can maximize all"
-	line "DVs to 15, though"
-	cont "its HIDDEN POWER"
-	cont "will become DARK"
-	cont "instead of random."
+	para "I can still push"
+	line "all of its DVs to"
+	cont "15, though its"
+	cont "HIDDEN POWER will"
+	cont "become DARK."
 
 	para "It will also"
 	line "become SHINY and"
