@@ -143,3 +143,53 @@ AnimateHPBar:
 	call _AnimateHPBar
 	call WaitBGMap
 	ret
+
+CheckNuggetPokerusOnBattleStart::
+	ld a, [wPartyCount]
+	and a
+	ret z
+
+	ld b, a ; loop counter
+	ld c, 0 ; party index
+.loop
+	push bc
+
+	; Skip Eggs
+	ld d, 0
+	ld e, c
+	ld hl, wPartySpecies
+	add hl, de
+	ld a, [hl]
+	cp EGG
+	jr z, .next
+
+	; Check held item
+	ld a, c
+	ld hl, wPartyMon1Item
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+	ld a, [hl]
+	cp NUGGET
+	jr nz, .next
+
+	; Check Pokérus byte (skip if currently infected or cured)
+	ld bc, MON_POKERUS - MON_ITEM
+	add hl, bc
+	ld a, [hl]
+	and a
+	jr nz, .next
+
+	; 10% chance (change to 1 percent or 5 percent if desired)
+	call Random
+	cp 10 percent
+	jr nc, .next
+
+	; Infect with Strain 1, 3 days duration
+	ld [hl], $13
+
+.next
+	pop bc
+	inc c
+	dec b
+	jr nz, .loop
+	ret
