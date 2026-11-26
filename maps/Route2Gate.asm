@@ -9,8 +9,8 @@ Route2Gate_MapScripts:
 Route2GateOaksAideScript:
 	faceplayer
 	opentext
-	checkevent EVENT_GOT_EXP_SHARE
-	iftrue .GotExpShare
+	checkevent EVENT_GOT_EXP_ALL
+	iftrue .GotExpAll
 	checkevent EVENT_GOT_HM05_FLASH
 	iftrue .GotFlash
 	writetext Route2GateOaksAideGiveFlashText
@@ -32,16 +32,22 @@ Route2GateOaksAideScript:
 	ifless 10, .NotEnough
 	writetext Route2GateOaksAideCongratsText
 	promptbutton
-	verbosegiveitem EXP_SHARE
+	verbosegiveitem EXP_ALL
 	iffalse .PackFull
-	setevent EVENT_GOT_EXP_SHARE
-	writetext Route2GateOaksAideExpShareExplainText
+	setevent EVENT_GOT_EXP_ALL
+	setevent EVENT_EXP_ALL_ACTIVE
+	writetext Route2GateOaksAideExpAllExplainText
 	waitbutton
-.PackFull
 	closetext
 	end
 
-.GotExpShare
+.PackFull
+	writetext Route2GateOaksAideBagFullText
+	waitbutton
+	closetext
+	end
+
+.GotExpAll
 	writetext Route2GateOaksAideFlashExplainText
 	waitbutton
 	closetext
@@ -94,13 +100,15 @@ Route2GateOaksAideAskPokemonText:
 	line "kinds of #MON,"
 	cont "I'm also supposed"
 	roll "to give you an"
-	cont "EXP.SHARE!"
+	cont "EXP.ALL!"
 
 	para "So, <PLAYER>! Have"
 	line "you caught at"
 	cont "least 10 kinds of"
 	roll "#MON?"
 	done
+
+
 
 Route2GateOaksAideNotEnoughText:
 	ntag "AIDE:"
@@ -129,15 +137,27 @@ Route2GateOaksAideCongratsText:
 	para "Congratulations!"
 	done
 
-Route2GateOaksAideExpShareExplainText:
+Route2GateOaksAideExpAllExplainText:
 	ntag "AIDE:"
-	text "When a #MON is"
-	line "holding EXP.SHARE,"
-	cont "they will receive"
-	roll "EXP from battles,"
-	cont "even if they don't"
-	roll "fight!"
+	text "That EXP.ALL"
+	line "shares EXP. with"
+	cont "your whole party."
+
+	para "You can turn it"
+	line "ON or OFF anytime"
+	cont "in your BAG!"
 	done
+
+Route2GateOaksAideBagFullText:
+	ntag "AIDE:"
+	text "Oh! Your BAG is"
+	line "full right now."
+
+	para "Make some room and"
+	line "come back for your"
+	cont "EXP.ALL!"
+	done
+
 ;
 ;	text "EXP.SHARE will"
 ;	line "share experience"
@@ -157,6 +177,14 @@ Route2GateOaksAideFlashExplainText:
 	line "the PAGER CARD in"
 	cont "your #GEAR to"
 	roll "use FLASH!"
+
+	para "And that EXP.ALL"
+	line "shares EXP. with"
+	cont "your whole party."
+
+	para "You can turn it"
+	line "ON or OFF anytime"
+	cont "in your BAG!"
 	done
 
 Route2GateOfficerScript:

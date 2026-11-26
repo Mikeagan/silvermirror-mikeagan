@@ -55,18 +55,10 @@ OakScript:
 	opentext
 	checkevent EVENT_GOT_POKEBALLS_FROM_OAK
 	iffalse .OakGiveBalls
-	checkevent EVENT_GOT_EXP_ALL
-	iffalse .RemindAide
 	writetext OakLabEvaluateDexText
 	promptbutton
 	special ProfOaksPCBoot
 	writetext OakLabOakGoodbyeText
-	waitbutton
-	closetext
-	end
-
-.RemindAide
-	writetext OaksLabOakTalkToAideText
 	waitbutton
 	closetext
 	end
@@ -515,9 +507,6 @@ DeliverOaksParcelScript:
 	playsound SFX_REGISTER_PHONE_NUMBER
 	waitsfx
 	promptbutton
-	writetext OaksLabOakTalkToAideText
-	promptbutton
-;	closetext
 	writetext OaksLabOakTalkToMomText
 	waitbutton
 	closetext
@@ -561,39 +550,12 @@ OaksAssistantText:
 	done
 
 OaksAssistant2Script:
-	faceplayer
-	opentext
-	checkevent EVENT_GOT_EXP_ALL
-	iftrue .GotExpAll
-	writetext OaksAssistant2GiveExpAllText
-	promptbutton
-	verbosegiveitem EXP_ALL
-	iffalse .BagFull
-	setevent EVENT_GOT_EXP_ALL
-	setevent EVENT_EXP_ALL_ACTIVE
-.GotExpAll:
-	writetext OaksAssistant2AfterText
-	waitbutton
-.BagFull:
-	closetext
-	end
+	jumptextfaceplayer OaksAssistant2Text
 
-OaksAssistant2GiveExpAllText:
+OaksAssistant2Text:
 	ntag "AIDE:"
-	text "PROF.OAK asked me"
-	line "to give you this"
-	cont "helpful device!"
-	done
-
-OaksAssistant2AfterText:
-	ntag "AIDE:"
-	text "That EXP.ALL"
-	line "shares EXP. with"
-	cont "your whole party."
-
-	para "You can turn it"
-	line "ON or OFF anytime"
-	cont "in your BAG!"
+	text "I study #MON as"
+	line "PROF.OAK's AIDE."
 	done
 
 ;OaksLabGirlScript:
@@ -1231,17 +1193,6 @@ OaksLabOakGivePhoneNumberText:
 GotOaksNumberText:
 	text "<PLAYER> got OAK's"
 	line "phone number."
-	done
-	
-OaksLabOakTalkToAideText:
-	ntag "OAK:"
-	text "Before you go,"
-	line "speak to my AIDE"
-	cont "on the right side."
-
-	para "He has a helpful"
-	line "device for your"
-	cont "journey!"
 	done
 
 OaksLabOakTalkToMomText:
