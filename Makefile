@@ -154,10 +154,10 @@ silvermirror_vc_opt    = -Cjv -t PM_CRYSTAL -i BYTE -n 1 -k 01 -l 0x33 -m 0x10 -
 	tools/stadium $@
 	@if [ "$@" = "silvermirror.gbc" ]; then \
 		cp -f "$@" "$(NAMED_ROM)"; \
-				if [ -f "$(BASE_ROM)" ]; then \
+		if [ -f "$(BASE_ROM)" ] && [ -f "tools/flips.exe" ]; then \
 			tools/flips.exe --create --bps "$(BASE_ROM)" "$@" "$(NAMED_BPS)"; \
 		else \
-			echo "Note: $(BASE_ROM) not found; skipping .bps patch creation."; \
+			echo "Note: $(BASE_ROM) or tools/flips.exe not found; skipping .bps patch creation."; \
 		fi; \
 	fi
 
