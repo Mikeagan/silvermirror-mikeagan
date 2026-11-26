@@ -584,7 +584,23 @@ OaksAssistant2Script:
 	end
 
 .AlreadyGood
-	writetext OaksAssistant2AlreadyGoodText
+	callasm CheckAlreadyMaxDVsAsm
+	iftrue .AlreadyMaxed
+	writetext OaksAssistant2OfferPerfectText
+	yesorno
+	iffalse .Declined
+	callasm MaxSelectedMonDVsAsm
+	callasm RecalcAndHealSelectedPartyMon
+	playsound SFX_DEX_FANFARE_50_79
+	waitsfx
+	callasm ShowTempMonDVsAsm
+	writetext OaksAssistant2PerfectedText
+	waitbutton
+	closetext
+	end
+
+.AlreadyMaxed
+	writetext OaksAssistant2AlreadyMaxedText
 	waitbutton
 	closetext
 	end
@@ -932,6 +948,42 @@ RerollLowDVsAsm:
 	add 11 ; 11, 13, or 15
 	ret
 
+CheckAlreadyMaxDVsAsm:
+	xor a
+	ld [wScriptVar], a
+
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1DVs
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+
+	ld a, [hli]
+	cp $ff
+	ret nz
+	ld a, [hl]
+	cp $ff
+	ret nz
+
+	ld a, 1
+	ld [wScriptVar], a
+	ret
+
+MaxSelectedMonDVsAsm:
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1DVs
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+
+	ld a, $ff ; Attack = 15, Defense = 15
+	ld [hli], a
+	ld a, $ff ; Speed = 15, Special = 15 (HP also becomes 15)
+	ld [hl], a
+
+	; Sync wTempMonDVs so ShowTempMonDVsAsm redraws the 15s immediately
+	ld [wTempMonDVs], a
+	ld [wTempMonDVs + 1], a
+	ret
+
 OaksAssistant2IntroText:
 	ntag "AIDE:"
 	text "I study #MON"
@@ -965,7 +1017,12 @@ OaksAssistant2ConfirmText:
 	line "potential stats on"
 	cont "@"
 	text_ram wStringBuffer3
-	text "?"
+	text " to"
+	cont "at least 10?"
+
+	para "Note: Changing DVs"
+	line "may also change"
+	cont "its GENDER!"
 	done
 
 OaksAssistant2DoneText:
@@ -984,6 +1041,48 @@ OaksAssistant2AlreadyGoodText:
 	text "'s"
 	line "genetics are"
 	cont "already solid!"
+	done
+
+OaksAssistant2OfferPerfectText:
+	ntag "AIDE:"
+	text "@"
+	text_ram wStringBuffer3
+	text "'s"
+	line "genetics are"
+	cont "already solid!"
+
+	para "I can maximize all"
+	line "DVs to 15, though"
+	cont "its HIDDEN POWER"
+	cont "will become DARK"
+	cont "instead of random."
+
+	para "It will also"
+	line "become SHINY and"
+	cont "FEMALE (if able)."
+
+	para "Maximize all of"
+	line "@"
+	text_ram wStringBuffer3
+	text "'s DVs?"
+	done
+
+OaksAssistant2PerfectedText:
+	ntag "AIDE:"
+	text "All done!"
+	line "@"
+	text_ram wStringBuffer3
+	text "'s"
+	cont "DVs are now maxed!"
+	done
+
+OaksAssistant2AlreadyMaxedText:
+	ntag "AIDE:"
+	text "@"
+	text_ram wStringBuffer3
+	text "'s"
+	line "DVs are already"
+	cont "at absolute peak!"
 	done
 
 OaksAssistant2DeclinedText:
