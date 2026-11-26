@@ -550,12 +550,447 @@ OaksAssistantText:
 	done
 
 OaksAssistant2Script:
-	jumptextfaceplayer OaksAssistant2Text
+	faceplayer
+	opentext
+	writetext OaksAssistant2IntroText
+	yesorno
+	iffalse .Declined
+	writetext OaksAssistant2WhichMonText
+	promptbutton
+	callasm SelectMonFromPartyForReroll
+	iffalse .Declined
+	ifequal EGG, .IsEgg
 
-OaksAssistant2Text:
+	getmonname STRING_BUFFER_3, USE_SCRIPT_VAR
+	callasm ShowTempMonDVsAsm
+	writetext OaksAssistant2ConfirmText
+	yesorno
+	iffalse .Declined
+	callasm RerollLowDVsAsm
+	iffalse .AlreadyGood
+	callasm RecalcAndHealSelectedPartyMon
+	playsound SFX_DEX_FANFARE_50_79
+	waitsfx
+	callasm ShowTempMonDVsAsm
+	writetext OaksAssistant2DoneText
+	waitbutton
+	closetext
+	end
+
+.IsEgg
+	writetext OaksAssistant2EggText
+	waitbutton
+	closetext
+	end
+
+.AlreadyGood
+	writetext OaksAssistant2AlreadyGoodText
+	waitbutton
+	closetext
+	end
+
+.Declined
+	writetext OaksAssistant2DeclinedText
+	waitbutton
+	closetext
+	end
+
+ShowTempMonDVsAsm:
+	farcall LoadFontsBattleExtra
+
+	; Draw 8x12 box at top-left (x=0, y=0 -> inner area 6 wide, 10 tall)
+	hlcoord 0, 0
+	ld b, 10
+	ld c, 6
+	call Textbox
+
+	; --- Calculate HP DV (LSB of Atk, Def, Spd, Spc) ---
+	ld a, [wTempMonDVs]
+	ld b, a
+	ld a, [wTempMonDVs + 1]
+	ld c, a
+
+	xor a
+	bit 4, b ; Atk bit 0
+	jr z, .no_hp8
+	or 8
+.no_hp8
+	bit 0, b ; Def bit 0
+	jr z, .no_hp4
+	or 4
+.no_hp4
+	bit 4, c ; Spd bit 0
+	jr z, .no_hp2
+	or 2
+.no_hp2
+	bit 0, c ; Spc bit 0
+	jr z, .no_hp1
+	or 1
+.no_hp1
+	hlcoord 1, 1
+	ld de, .HPStr
+	call .PrintDVRow
+
+	; --- Attack DV ---
+	ld a, [wTempMonDVs]
+	swap a
+	and $0f
+	hlcoord 1, 3
+	ld de, .AtkStr
+	call .PrintDVRow
+
+	; --- Defense DV ---
+	ld a, [wTempMonDVs]
+	and $0f
+	hlcoord 1, 5
+	ld de, .DefStr
+	call .PrintDVRow
+
+	; --- Speed DV ---
+	ld a, [wTempMonDVs + 1]
+	swap a
+	and $0f
+	hlcoord 1, 7
+	ld de, .SpdStr
+	call .PrintDVRow
+
+	; --- Special DV ---
+	ld a, [wTempMonDVs + 1]
+	and $0f
+	hlcoord 1, 9
+	ld de, .SpcStr
+	call .PrintDVRow
+
+	call WaitBGMap
+	ret
+
+.PrintDVRow:
+	; a = DV (0..15), de = 3-char label, hl = top-left inside box (col 1)
+	push af
+	push hl
+	call PlaceString
+	pop hl
+	pop af
+
+	; Print 2-digit DV number at col + 4 (col 5)
+	push hl
+	ld bc, 4
+	add hl, bc
+	ld [wBufferMonOT], a
+	push af
+	ld de, wBufferMonOT
+	lb bc, 1, 2
+	call PrintNum
+	pop af
+	pop hl
+
+	; Draw 6-tile bar on next row (hl + SCREEN_WIDTH), max 15 -> 48 pixels
+	ld bc, SCREEN_WIDTH
+	add hl, bc
+	; Scale 0..15 to 0..45 pixels (a * 3) for a 6-tile (48px) bar
+	ld b, a
+	add a
+	add b ; a = DV * 3 (0..45)
+	ld c, a
+	ld b, 6 ; 6 tiles wide
+.bar_loop
+	ld a, c
+	cp 8
+	jr nc, .full_tile
+	and a
+	jr z, .empty_tile
+	; Partial bar tile ($63..$69 in LoadFontsBattleExtra)
+	add $62
+	ld [hli], a
+	ld c, 0
+	dec b
+	jr nz, .bar_loop
+	ret
+.full_tile
+	ld [hl], $6a ; full bar tile
+	inc hl
+	sub 8
+	ld c, a
+	dec b
+	jr nz, .bar_loop
+	ret
+.empty_tile
+	ld [hl], $62 ; empty bar tile
+	inc hl
+	dec b
+	jr nz, .bar_loop
+	ret
+
+.HPStr:  db "HP @"
+.AtkStr: db "ATK@"
+.DefStr: db "DEF@"
+.SpdStr: db "SPD@"
+.SpcStr: db "SPC@"
+
+
+SelectMonFromPartyForReroll:
+	farcall FadeToMenu
+	xor a
+	ld [wPartyMenuActionText], a ; PARTYMENUACTION_CHOOSE_POKEMON
+	farcall SelectMonFromParty
+	push af
+	farcall ExitAllMenus
+	pop af
+	ld a, 0
+	jr c, .done
+
+	; Load selected mon's DVs into wTempMonDVs for PrintTempMonDVs
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1DVs
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+	ld a, [hli]
+	ld [wTempMonDVs], a
+	ld a, [hl]
+	ld [wTempMonDVs + 1], a
+
+	ld a, [wCurPartySpecies]
+.done
+	ld [wScriptVar], a
+	ret
+
+RecalcAndHealSelectedPartyMon:
+	; Load species, base stats, and level from wCurPartyMon
+	ld a, [wCurPartyMon]
+	ld c, a
+	ld b, 0
+	ld hl, wPartySpecies
+	add hl, bc
+	ld a, [hl]
+	ld [wCurPartySpecies], a
+	ld [wCurSpecies], a ; <-- GetBaseData reads wCurSpecies!
+	call GetBaseData
+
+	ld a, MON_LEVEL
+	call GetPartyParamLocation
+	ld a, [hl]
+	ld [wCurPartyLevel], a
+
+	; Recalculate MaxHP and all 5 stats (identical to SetTempPartyMonData in bills_pc.asm)
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1MaxHP
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+	push hl ; save wPartyMonXMaxHP so second AddNTimes doesn't clobber de
+
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1StatExp - 1
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes ; hl = wPartyMonXStatExp - 1
+	pop de ; de = wPartyMonXMaxHP
+
+	ld b, TRUE
+	predef CalcMonStats
+
+	; Top off current HP, PP, and status
+	farcall HealPartyMon
+	ret
+
+RerollLowDVsAsm:
+	xor a
+	ld [wScriptVar], a
+
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMon1DVs
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+	push hl ; save pointer to MON_DVS
+
+	; --- Byte 0: Attack (upper nibble) & Defense (lower nibble) ---
+	ld a, [hl]
+	ld b, a
+	and $f0
+	cp $a0 ; Attack < 10?
+	jr nc, .check_def
+	call .Roll10To15
+	swap a
+	ld c, a
+	ld a, b
+	and $0f
+	or c
+	ld b, a
+	ld a, 1
+	ld [wScriptVar], a
+
+.check_def
+	ld a, b
+	and $0f
+	cp 10 ; Defense < 10?
+	jr nc, .save_byte0
+	call .Roll10To15
+	ld c, a
+	ld a, b
+	and $f0
+	or c
+	ld b, a
+	ld a, 1
+	ld [wScriptVar], a
+
+.save_byte0
+	ld [hl], b
+	inc hl
+
+	; --- Byte 1: Speed (upper nibble) & Special (lower nibble) ---
+	ld a, [hl]
+	ld b, a
+	and $f0
+	cp $a0 ; Speed < 10?
+	jr nc, .check_spc
+	call .Roll10To15
+	swap a
+	ld c, a
+	ld a, b
+	and $0f
+	or c
+	ld b, a
+	ld a, 1
+	ld [wScriptVar], a
+
+.check_spc
+	ld a, b
+	and $0f
+	cp 10 ; Special < 10?
+	jr nc, .save_byte1
+	call .Roll10To15
+	ld c, a
+	ld a, b
+	and $f0
+	or c
+	ld b, a
+	ld a, 1
+	ld [wScriptVar], a
+
+.save_byte1
+	ld [hl], b
+	dec hl ; back to Byte 0 (Atk/Def)
+
+	; --- Check derived HP DV (must be >= 10) ---
+	; HP DV = ((Atk & 1) << 3) | ((Def & 1) << 2) | ((Spd & 1) << 1) | (Spc & 1)
+	ld a, [hli]
+	ld d, a ; Byte 0 (Atk/Def)
+	ld e, [hl] ; Byte 1 (Spd/Spc)
+	dec hl ; back to Byte 0
+
+	xor a
+	bit 4, d ; Atk odd? (+8)
+	jr z, .hp_no8
+	or 8
+.hp_no8
+	bit 0, d ; Def odd? (+4)
+	jr z, .hp_no4
+	or 4
+.hp_no4
+	bit 4, e ; Spd odd? (+2)
+	jr z, .hp_no2
+	or 2
+.hp_no2
+	bit 0, e ; Spc odd? (+1)
+	jr z, .hp_no1
+	or 1
+.hp_no1
+	cp 10 ; HP DV < 10?
+	jr nc, .sync_temp_dvs
+
+	; Force Attack to an odd DV in 11..15 (11, 13, or 15) so HP gets +8
+	call .RollOdd11To15
+	swap a
+	ld c, a
+	ld a, [hl]
+	and $0f
+	or c
+	ld [hl], a
+	ld a, 1
+	ld [wScriptVar], a
+
+.sync_temp_dvs
+	pop hl ; restore pointer to MON_DVS
+	ld a, [hli]
+	ld [wTempMonDVs], a
+	ld a, [hl]
+	ld [wTempMonDVs + 1], a
+	ret
+
+.Roll10To15:
+	call Random
+	and $07
+	cp 6
+	jr nc, .Roll10To15
+	add 10 ; 10..15 ($0a..$0f)
+	ret
+
+.RollOdd11To15:
+	call Random
+	and $03
+	cp 3
+	jr nc, .RollOdd11To15
+	add a ; 0, 2, or 4
+	add 11 ; 11, 13, or 15
+	ret
+
+OaksAssistant2IntroText:
 	ntag "AIDE:"
-	text "I study #MON as"
-	line "PROF.OAK's AIDE."
+	text "I study #MON"
+	line "genetics for"
+	cont "PROF.OAK!"
+
+	para "I can boost any"
+	line "weak traits on"
+	cont "your #MON."
+
+	para "Want me to"
+	line "examine one?"
+	done
+
+OaksAssistant2WhichMonText:
+	ntag "AIDE:"
+	text "Which #MON"
+	line "should I check?"
+	done
+
+OaksAssistant2EggText:
+	ntag "AIDE:"
+	text "That's an EGG!"
+	line "Wait until it"
+	cont "hatches first."
+	done
+
+OaksAssistant2ConfirmText:
+	ntag "AIDE:"
+	text "Reroll any low"
+	line "potential stats on"
+	cont "@"
+	text_ram wStringBuffer3
+	text "?"
+	done
+
+OaksAssistant2DoneText:
+	ntag "AIDE:"
+	text "All done!"
+	line "@"
+	text_ram wStringBuffer3
+	text "'s weak"
+	cont "traits improved!"
+	done
+
+OaksAssistant2AlreadyGoodText:
+	ntag "AIDE:"
+	text "@"
+	text_ram wStringBuffer3
+	text "'s"
+	line "genetics are"
+	cont "already solid!"
+	done
+
+OaksAssistant2DeclinedText:
+	ntag "AIDE:"
+	text "Come back anytime"
+	line "you want me to"
+	cont "check your team."
 	done
 
 ;OaksLabGirlScript:

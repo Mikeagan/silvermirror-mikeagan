@@ -22,7 +22,7 @@ HealParty:
 .done
 	ret
 
-HealPartyMon:
+HealPartyMon::
 	ld a, MON_SPECIES
 	call GetPartyParamLocation
 	ld d, h
