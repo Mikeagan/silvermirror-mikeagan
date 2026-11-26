@@ -4,9 +4,11 @@ roms := \
 patches := silvermirror.patch
 SM_VER    := $(shell grep -E 'SM_GAME_VERSION' version.asm | cut -d'"' -f2)
 MOD_VER   := $(shell grep -E 'GAME_VERSION' version.asm | grep -v 'SM_' | cut -d'"' -f2)
-BASE_ROM  := baserom_crystal11.gbc
-NAMED_ROM := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).gbc
-NAMED_BPS := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).bps
+BASE_ROM_10  := baserom_crystal10.gbc
+BASE_ROM_11  := baserom_crystal11.gbc
+NAMED_ROM    := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).gbc
+NAMED_BPS_11 := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER) (v1.1).bps
+NAMED_BPS_10 := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER) (v1.0).bps
 
 rom_obj := \
 	audio.o \
@@ -171,12 +173,17 @@ silvermirror_vc_opt    = -Cjv -t PM_CRYSTAL -i BYTE -n 1 -k 01 -l 0x33 -m 0x10 -
 	$(RGBFIX) $($*_opt) $@
 	tools/stadium $@
 	@if [ "$@" = "silvermirror.gbc" ]; then \
-		cp -f "$@" "$(NAMED_ROM)"; \
-		if [ -f "$(BASE_ROM)" ] && [ -f "tools/flips.exe" ]; then \
-			tools/flips.exe --create --bps "$(BASE_ROM)" "$@" "$(NAMED_BPS)"; \
+				cp "$@" "$(NAMED_ROM)"
+		if [ -f "$(BASE_ROM_11)" ]; then \
+			tools/flips.exe --create --bps "$(BASE_ROM_11)" "$@" "$(NAMED_BPS_11)"; \
 		else \
-			echo "Note: $(BASE_ROM) or tools/flips.exe not found; skipping .bps patch creation."; \
-		fi; \
+			echo "Skipping v1.1 BPS patch ($(BASE_ROM_11) not found)"; \
+		fi
+		if [ -f "$(BASE_ROM_10)" ]; then \
+			tools/flips.exe --create --bps "$(BASE_ROM_10)" "$@" "$(NAMED_BPS_10)"; \
+		else \
+			echo "Skipping v1.0 BPS patch ($(BASE_ROM_10) not found)"; \
+		fi
 	fi
 
 
