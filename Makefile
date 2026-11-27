@@ -2,8 +2,8 @@ roms := \
 	silvermirror.gbc \
 	silvermirror_debug.gbc
 patches := silvermirror.patch
-SM_VER    := $(shell grep -E 'SM_GAME_VERSION' version.asm | cut -d'"' -f2)
-MOD_VER   := $(shell grep -E 'GAME_VERSION' version.asm | grep -v 'SM_' | cut -d'"' -f2)
+SM_VER := $(shell sed -n 's/.*SM_GAME_VERSION.*\\" *\([^\\"]*\) *\\".*/\1/p' version.asm)
+MOD_VER := $(shell sed -n '/SM_/!s/.*GAME_VERSION.*\\" *\([^\\"]*\) *\\".*/\1/p' version.asm)
 BASE_ROM_10  := baserom_crystal10.gbc
 BASE_ROM_11  := baserom_crystal11.gbc
 NAMED_ROM    := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).gbc
@@ -15,7 +15,6 @@ rom_obj := \
 	home.o \
 	main.o \
 	ram.o \
-	version.asm \
 	data/text/common.o \
 	data/maps/map_data.o \
 	data/pokemon/dex_entries.o \
@@ -116,11 +115,12 @@ upstream:
 		echo "Usage: make upstream VER=1.3.0"; \
 		exit 1; \
 	fi
-	@awk -v ver="$(VER)" '/DEF SM_GAME_VERSION/ { \
-		print "DEF SM_GAME_VERSION EQUS \"\\\"" ver "\\\"\""; \
-		next \
-	} { print }' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
-	@grep "DEF SM_GAME_VERSION" version.asm
+	@awk -v ver="$(VER)" ' \
+		/DEF SM_GAME_VERSION/ { print "DEF SM_GAME_VERSION EQUS \"\\\"" ver "\\\"\""; next } \
+		/DEF GAME_VERSION/    { print "DEF GAME_VERSION    EQUS \"\\\"1\\\"\""; next } \
+		{ print } \
+	' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
+	@grep -E "GAME_VERSION" version.asm
 	$(MAKE)
 
 RGBASMFLAGS = -hL -Q8 -P includes.asm -Weverything -Wnumeric-string=2 -Wtruncation=1
