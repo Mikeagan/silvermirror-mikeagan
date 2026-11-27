@@ -2121,6 +2121,7 @@ HandleEnemyMonFaint:
 	call z, FaintYourPokemon
 	xor a
 	ld [wWhichMonFaintedFirst], a
+call DropWildMonHeldItem
 	call UpdateBattleStateAndExperienceAfterEnemyFaint
 	call CheckPlayerPartyForFitMon
 	ld a, d
@@ -2338,6 +2339,51 @@ FaintEnemyPokemon:
 	call ClearBox
 	ld hl, BattleText_EnemyMonFainted
 	jp StdBattleTextbox
+
+DropWildMonHeldItem:
+	; Only trigger in wild battles (wBattleMode == 1)
+	ld a, [wBattleMode]
+	dec a
+	ret nz
+
+	; Check if the wild Pokémon is holding an item
+	ld a, [wEnemyMonItem]
+	and a
+	ret z
+
+	; Load item ID and quantity (1) into wCurItem / wItemQuantityChange
+	ld [wCurItem], a
+	ld [wNamedObjectIndex], a
+	ld a, 1
+	ld [wItemQuantityChange], a
+
+	; Try to place the item into the player's bag
+	ld hl, wNumItems
+	call ReceiveItem
+	jr nc, .bag_full
+
+	; Clear wEnemyMonItem so it can't be dropped again
+	xor a
+	ld [wEnemyMonItem], a
+
+	; Load item name into wStringBuffer1 and print message
+	call GetItemName
+	call CopyName1
+	ld de, SFX_ITEM
+	call PlaySFX
+	call WaitSFX
+	ld hl, WildMonDroppedItemText
+	jp StdBattleTextbox
+
+.bag_full
+	ret
+
+WildMonDroppedItemText:
+	text "<PLAYER> found"
+	line "@"
+	text_ram wStringBuffer1
+	text "!"
+	prompt
 
 CheckEnemyTrainerDefeated:
 	ld a, [wOTPartyCount]
