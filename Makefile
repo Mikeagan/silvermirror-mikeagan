@@ -173,17 +173,17 @@ silvermirror_vc_opt    = -Cjv -t PM_CRYSTAL -i BYTE -n 1 -k 01 -l 0x33 -m 0x10 -
 	$(RGBFIX) $($*_opt) $@
 	tools/stadium $@
 	@if [ "$@" = "silvermirror.gbc" ]; then \
-				cp "$@" "$(NAMED_ROM)"
+		cp "$@" "$(NAMED_ROM)"; \
 		if [ -f "$(BASE_ROM_11)" ]; then \
 			tools/flips.exe --create --bps "$(BASE_ROM_11)" "$@" "$(NAMED_BPS_11)"; \
 		else \
 			echo "Skipping v1.1 BPS patch ($(BASE_ROM_11) not found)"; \
-		fi
+		fi; \
 		if [ -f "$(BASE_ROM_10)" ]; then \
 			tools/flips.exe --create --bps "$(BASE_ROM_10)" "$@" "$(NAMED_BPS_10)"; \
 		else \
 			echo "Skipping v1.0 BPS patch ($(BASE_ROM_10) not found)"; \
-		fi
+		fi; \
 	fi
 
 
