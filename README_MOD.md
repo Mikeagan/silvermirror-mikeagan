@@ -79,3 +79,4 @@ A custom fork of *Pokémon Silver Mirror* adding quality-of-life improvements, r
 
 ## Future Ideas (Planned)
 * **Fast Berry & Apricorn Tree Respawns:** Possibly Remove the daily reset lock in `engine/events/fruit_trees.asm` so fruit and Apricorn trees replenish immediately without waiting for midnight.
+* **Oak's Lab Aide Leaf Costs:** Require a **Silver Leaf** to reroll low DVs up to good stats (`10–15`) and a **Gold Leaf** to maximize good DVs to perfect (`15`).
