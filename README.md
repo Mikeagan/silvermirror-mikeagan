@@ -1,4 +1,4 @@
-> **Looking for the custom ROM hack features?** View the full **[Mod Changelog (MOD_CHANGES.md)](./MOD_CHANGES.md)**.
+> **Looking for the custom ROM hack features?** View the full **[Mod Changelog (README_MOD.md)](./README_MOD.md)**.
 
 # Pokémon: Silver Mirror
 

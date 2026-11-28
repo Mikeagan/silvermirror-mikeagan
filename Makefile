@@ -2,8 +2,8 @@ roms := \
 	silvermirror.gbc \
 	silvermirror_debug.gbc
 patches := silvermirror.patch
-SM_VER := $(shell sed -n 's/.*SM_GAME_VERSION.*\\" *\([^\\"]*\) *\\".*/\1/p' version.asm)
-MOD_VER := $(shell sed -n '/SM_/!s/.*GAME_VERSION.*\\" *\([^\\"]*\) *\\".*/\1/p' version.asm)
+SM_VER := $(shell sed -n 's/.*SM_GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm)
+MOD_VER := $(shell sed -n '/SM_/!s/.*GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm)
 BASE_ROM_10  := baserom_crystal10.gbc
 BASE_ROM_11  := baserom_crystal11.gbc
 NAMED_ROM    := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).gbc
@@ -102,12 +102,24 @@ tools:
 	$(MAKE) -C tools/
 
 bump:
-	@awk -F'\\"' '/DEF GAME_VERSION/ && !/SM_GAME_VERSION/ { \
-		new_ver = $$2 + 1; \
-		print "DEF GAME_VERSION    EQUS \"\\\"" new_ver "\\\"\""; \
-		next \
-	} { print }' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
-	@grep "DEF GAME_VERSION" version.asm
+	@awk -F'"' ' \
+		/DEF GAME_VERSION/ && !/SM_GAME_VERSION/ { \
+			new_ver = $$2 + 1; \
+			printf "DEF GAME_VERSION    EQUS \"%s\"\n", new_ver; \
+			next \
+		} { print } \
+	' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
+	@SM_V=$$(sed -n 's/.*SM_GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
+	MOD_V=$$(sed -n '/SM_/!s/.*GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
+	if [ -f MOD_CHANGES.md ]; then \
+		awk -v sm="$$SM_V" -v mod="$$MOD_V" ' \
+			/^\*\*Base Version:\*\*/ { \
+				print "**Base Version:** SM " sm " | **Mod Version:** " mod; \
+				next \
+			} { print } \
+		' MOD_CHANGES.md > MOD_CHANGES.md.tmp && mv MOD_CHANGES.md.tmp MOD_CHANGES.md; \
+	fi
+	@cat version.asm
 	$(MAKE)
 
 upstream:
@@ -116,11 +128,20 @@ upstream:
 		exit 1; \
 	fi
 	@awk -v ver="$(VER)" ' \
-		/DEF SM_GAME_VERSION/ { print "DEF SM_GAME_VERSION EQUS \"\\\"" ver "\\\"\""; next } \
-		/DEF GAME_VERSION/    { print "DEF GAME_VERSION    EQUS \"\\\"1\\\"\""; next } \
+		/DEF SM_GAME_VERSION/ { printf "DEF SM_GAME_VERSION EQUS \"%s\"\n", ver; next } \
 		{ print } \
 	' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
-	@grep -E "GAME_VERSION" version.asm
+	@SM_V=$$(sed -n 's/.*SM_GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
+	MOD_V=$$(sed -n '/SM_/!s/.*GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
+	if [ -f MOD_CHANGES.md ]; then \
+		awk -v sm="$$SM_V" -v mod="$$MOD_V" ' \
+			/^\*\*Base Version:\*\*/ { \
+				print "**Base Version:** SM " sm " | **Mod Version:** " mod; \
+				next \
+			} { print } \
+		' MOD_CHANGES.md > MOD_CHANGES.md.tmp && mv MOD_CHANGES.md.tmp MOD_CHANGES.md; \
+	fi
+	@cat version.asm
 	$(MAKE)
 
 RGBASMFLAGS = -hL -Q8 -P includes.asm -Weverything -Wnumeric-string=2 -Wtruncation=1
@@ -148,7 +169,7 @@ $(info $(shell $(MAKE) -C tools))
 # The dep rules have to be explicit or else missing files won't be reported.
 # As a side effect, they're evaluated immediately instead of when the rule is invoked.
 # It doesn't look like $(shell) can be deferred so there might not be a better way.
-preinclude_deps := includes.asm $(shell tools/scan_includes includes.asm)
+preinclude_deps := includes.asm version.asm $(shell tools/scan_includes includes.asm)
 define DEP
 $1: $2 $$(shell tools/scan_includes $2) $(preinclude_deps) | rgbdscheck.o
 	$$(RGBASM) $$(RGBASMFLAGS) -o $$@ $$<
