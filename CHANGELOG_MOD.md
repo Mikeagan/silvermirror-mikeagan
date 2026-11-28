@@ -131,7 +131,7 @@ Full version history for custom changes built on *Pokémon Silver Mirror*. For a
 * **Abra, Magikarp & Gyarados Learnsets (`data/pokemon/evos_attacks.asm`, `data/pokemon/base_stats/magikarp.asm`):**
   * **Abra:** Added **Kinesis** at level **8** and **Disable** at level **10**.
   * **Magikarp:** Reworked learnset to **Splash** (Lv. 1), **Flail** (Lv. 5), **Tackle** (Lv. 10), **Water Gun** (Lv. 15), and **Bounce** (Lv. 19), plus enabled **Water Gun** via TM compatibility.
-  * **Gyarados:** Added **Bounce** at level **50** (and adjusted **Bite** evolution move to level **19**).
+  * **Gyarados:** Added **Bounce** at level **50** (and added **Thrash** move to level **21**).
 * **Stats Screen Happiness Display (`engine/pokemon/stats_screen.asm`):** Added `StatsScreen_PrintHappiness` to the Blue Page (`LoadBluePage`) to display a heart icon alongside the Pokémon's exact friendship value out of **`/255`**.
 * **Mr. Psychic Stat EXP & Hidden Power Evaluation (`engine/events/specials.asm`, `engine/pokemon/mon_stats.asm`, `data/predef_pointers.asm`, `data/text/common_2.asm`):**
   * Implemented `PrintTempMonStatExp` to render a full-width window displaying all 5 **Stat EXP** values (`HP`, `ATK`, `DEF`, `SPD`, `SPC`) out of `/65535`, wired into Mr. Psychic's second evaluation screen.
