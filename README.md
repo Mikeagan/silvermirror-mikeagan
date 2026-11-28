@@ -8,38 +8,6 @@ I also wanted to include a new post-game storyline in Johto, as a mirror to the 
 
 ![box-art](https://github.com/Th3Element05/silvermirror/blob/master/Screenshots/silvermirror-box.png)  
 
-## Version 1.2.2.M.1 (Mikeagan Changes)
-
-Added changed EXP BOOSTS (by friend request):
-
-- EXP.SHARE is now given in Mt Moon Pokecenter after get Magikarp.
-
-- EXP.ALL like EXP.SHARE but for entire party. Use turns ON/OFF. Now given by Oaks Aid instead of EXP.SHARE
-
-- BOOSTER CHIP available in Celadon Mart. Pokemon gain boosted experience as if traded without the trade negatives.
-
-- Options Menu: Boost EXP. ON = 2x EXP gain.
-
-Prof Oak Aid in lab now can reroll bad DVs for pokemon (will add cost silver leaf)
-
-- If already good stats (above 10) can perfect them (will add cost gold leaf)
-
-Mr Psychic now also tells STAT EXP and HIDDEN POWER type.
-
-Berry & Apricorns drop 5 each.
-
-Price changes to some items.
-
-MOST evolution items available in Celadon Mart.
-
-Nuggets have a new secret use. talk to Trainer in Lavender Mart for details.
-
-KURTS balls work similar to Heart & Soul. 8x for certain types each with Friendship boost. Best balls in game, other than master ball.
-
-Wild Pokemon will now drop held items when they feint.
-
-more...
-
 ## Version 1.2.1 (Current Release)  
 
 Version 1.2.1 should be compatible with saves from v1.2.0.  
