@@ -9,10 +9,10 @@ A custom fork of *Pokémon Silver Mirror* adding quality-of-life improvements, r
 * **Dual Registered Key Items:** Assign two key items simultaneously from the Pack menu—**Tap `SELECT`** (`TAP.SEL`) to use the primary item, or **Hold `SELECT`** (`HOLD.SEL`) to use the secondary item. Selecting the same slot again unregisters the item.
 * **Upgraded Itemfinder:** When detecting a hidden item nearby, the player automatically turns toward the item's direction (and spins in place twice when standing directly on top of it).
 * **EXP Boost Option:** Added an **EXP Boost (`ON` / `OFF`)** toggle in the in-game Options menu that doubles all battle experience points earned when active.
-* **In-Game Version Display:** Current base and mod versions (`S.MIRROR:1.2.2` / `MIKEAGAN:26`) are displayed on both the Main Menu and the Save confirmation prompt.
+* **In-Game Version Display:** Current base and mod versions are displayed dynamically on the Title Screen (`M.26`), Main Menu (`S.MIRROR:1.2.2` / `MIKEAGAN:26`), and Save confirmation prompt.
 * **Summary Screen Happiness Display:** The Pokémon summary screen displays a heart icon alongside the Pokémon's exact friendship value out of **`/255`**.
 * **Full 50-Contact Pokégear Phone:** Expanded Pokégear storage capacity to **50** phone numbers so every contact in the game can be registered without deleting existing entries.
-* **Fast Berry & Apricorn Respawns & 5x Yields:** Removed the midnight daily reset lock and increased fruit/apricorn tree harvests across Johto and Kanto to **5** items per tree.
+* **5x Berry & Apricorn Yields:** Increased fruit/apricorn tree harvests across Johto and Kanto to **5** items per tree.
 * **Pokémon Center Healing:** The player automatically turns downward away from Nurse Joy after healing.
 
 ---
@@ -51,7 +51,7 @@ A custom fork of *Pokémon Silver Mirror* adding quality-of-life improvements, r
 
 ## Shops & Prize Rebalances
 * **General Item Price Reductions:** Lowered standard prices on **Poké Balls** (`¥20`/`¥60`/`¥120`), **Vitamins** (`¥980`), **PP Up** (`¥980`), and **Rare Candy** (`¥480`).
-* **New 7- & 8-Badge Mart Tiers:** Added 7-badge Poké Ball and 8-badge Medicine tiers across Johto and Kanto Poké Marts and Dept. Stores, making **Master Ball** purchasable after 7 badges and **Max Revive** / **Full Restore** purchasable after 8 badges.
+* **New 7- & 8-Badge Mart Tiers:** Added 7-badge Poké Ball and 8-badge Medicine tiers across Johto and Kanto Poké Marts and Dept. Stores, making **Master Ball** purchasable after **7 badges** and **Max Revive** / **Full Restore** purchasable after **8 badges**. **Master Ball** may be actually after **8 badges**, will test
 * **Celadon Dept. Store 4F (`MartEvolution1`):** Expanded to stock 11 items including **Fire**, **Thunder**, **Water**, **Leaf**, **Sun**, **Moon**, and **Dusk Stones**, plus **Metal Coat**, **Dragon Scale**, and **Linking Cord**.
 * **Goldenrod Underground Bargain Shop:** Shifted schedule from morning-only on select days to **every night (`NITE`) across all 7 days of the week**.
 * **Buena's Password Prizes:** Reduced prize costs to **1 point** (**Ultra Ball**, **Full Restore**, **Rare Candy**) and **2 points** (**PP Up** and all **Vitamins**).
@@ -74,3 +74,8 @@ A custom fork of *Pokémon Silver Mirror* adding quality-of-life improvements, r
 * **Lavender Mart:** Added a Cooltrainer dialogue hint pointing to the **Nugget** Pokérus secret.
 * **Celadon Cafe:** Added a hidden **Leftovers** pickup.
 * **Mt. Moon Pokémon Center 1F:** Added a readable Team Rocket newspaper on the table.
+
+---
+
+## Future Ideas (Planned)
+* **Fast Berry & Apricorn Tree Respawns:** Possibly Remove the daily reset lock in `engine/events/fruit_trees.asm` so fruit and Apricorn trees replenish immediately without waiting for midnight.
