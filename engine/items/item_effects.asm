@@ -182,7 +182,8 @@ ItemEffects:
 	dw NoEffect            ; RAZOR_FANG
 	dw NoEffect            ; RAZOR_CLAW
 	dw NoEffect            ; WIDE_LENS
-	dw NoEffect            ; ITEM_A9
+	dw ExpAllEffect        ; EXP_ALL; was ITEM_A9
+	dw BoosterChipEffect   ; BOOSTER CHIP
 	assert_table_length NUM_ITEMS ; assert_table_length ITEM_B3
 ; The items past ITEM_B3 do not have effect entries:
 ; They all have the ITEMMENU_NOUSE attribute so they can't be used anyway.
@@ -278,34 +279,22 @@ PokeBallEffect:
 	add hl, de
 	ld d, h
 	ld e, l
+	
+.shift_loop
 	ld a, d
 	and a
-	jr z, .okay_1
+	jr z, .check_cur_low  ; If Max HP's high byte is 0, we are safe to proceed
+	srl d                 ; Right shift Max HP high byte
+	rr e                  ; Rotate Max HP low byte
+	srl b                 ; Right shift Current HP high byte
+	rr c                  ; Rotate Current HP low byte
+	jr .shift_loop
 
-	srl d
-	rr e
-	srl d
-	rr e
-	srl b
-	rr c
-	srl b
-	rr c
-
-;	; BUG: Catch rate formula breaks for Pokémon with max HP > 341 (see docs/bugs_and_glitches.md)
-	; Divide by 2 again if there's still something in the high byte
-	ld a, d
-	and a
-	jr z, .check_cur_low
-	srl d
-	rr e
-	srl b
-	rr c
 .check_cur_low
-
 	ld a, c
 	and a
 	jr nz, .okay_1
-	ld c, $1
+	ld c, $1              ; Prevent current HP from dropping to 0 due to shifting
 .okay_1
 	ld b, e
 
@@ -547,7 +536,7 @@ PokeBallEffect:
 
 	ld a, [wPartyCount]
 	cp PARTY_LENGTH
-	jr z, .SendToPC
+	jp z, .SendToPC
 
 	xor a ; PARTYMON
 	ld [wMonType], a
@@ -559,8 +548,22 @@ PokeBallEffect:
 
 	ld a, [wCurItem]
 	cp FRIEND_BALL
-	jr nz, .SkipPartyMonFriendBall
-
+	jr z, .PartyMonFriendBall
+	cp LOVE_BALL
+	jr z, .PartyMonFriendBall
+	cp FAST_BALL
+	jr z, .PartyMonFriendBall
+	cp HEAVY_BALL
+	jr z, .PartyMonFriendBall
+	cp LEVEL_BALL
+	jr z, .PartyMonFriendBall
+	cp DUSK_BALL
+	jr z, .PartyMonFriendBall
+	cp NET_BALL
+	jr z, .PartyMonFriendBall
+	jr .SkipPartyMonFriendBall
+	
+.PartyMonFriendBall:
 	ld a, [wPartyCount]
 	dec a
 	ld hl, wPartyMon1Happiness
@@ -620,10 +623,25 @@ PokeBallEffect:
 .BoxNotFullYet:
 	ld a, [wCurItem]
 	cp FRIEND_BALL
-	jr nz, .SkipBoxMonFriendBall
-	; The captured mon is now first in the box
+	jr z, .BoxMonFriendBall
+	cp LOVE_BALL
+	jr z, .BoxMonFriendBall
+	cp FAST_BALL
+	jr z, .BoxMonFriendBall
+	cp HEAVY_BALL
+	jr z, .BoxMonFriendBall
+	cp LEVEL_BALL
+	jr z, .BoxMonFriendBall
+	cp DUSK_BALL
+	jr z, .BoxMonFriendBall
+	cp NET_BALL
+	jr z, .BoxMonFriendBall
+	jr .SkipBoxMonFriendBall
+
+.BoxMonFriendBall:	
 	ld a, FRIEND_BALL_HAPPINESS
 	ld [wBufferMonHappiness], a
+
 .SkipBoxMonFriendBall:
 	ld hl, AskGiveNicknameText
 	call PrintText
@@ -660,8 +678,7 @@ PokeBallEffect:
 
 	newfarcall UpdateStorageBoxMonFromTemp
 
-	; Switch current Box if it was full. We can check this by checking if
-	; the buffermon's box location matches the current box.
+	; Switch current Box if it was full.
 	ld a, [wBufferMonBox]
 	ld b, a
 	ld a, [wCurBox]
@@ -676,12 +693,11 @@ PokeBallEffect:
 	call PrintText
 	pop bc
 
-	; Switch current box.
 	ld a, b
 	dec a
 	ld [wCurBox], a
 
-.curbox_not_full
+.curbox_not_full:
 	ld a, [wCurBox]
 	inc a
 	ld b, a
@@ -692,20 +708,20 @@ PokeBallEffect:
 
 	call RotateThreePalettesRight
 	call LoadStandardFont
-	jr .return_from_capture
+	jp .return_from_capture     ; FIXED: Crucial jump stops normal PC catches bleeding into the Bug Contest logic below
 
-.catch_bug_contest_mon
+.catch_bug_contest_mon:
 	farcall BugContest_SetCaughtContestMon
 	jr .return_from_capture
 
 .FinishTutorial:
 	ld hl, Text_GotchaMonWasCaught
 
-.shake_and_break_free
+.shake_and_break_free:
 	call PrintText
 	call ClearSprites
 
-.return_from_capture
+.return_from_capture:
 	ld a, [wBattleType]
 	cp BATTLETYPE_TUTORIAL
 	ret z
@@ -723,18 +739,18 @@ PokeBallEffect:
 	call ClearBGPalettes
 	call ClearTilemap
 
-.toss
+.toss:
 	ld hl, wNumItems
 	inc a
 	ld [wItemQuantityChange], a
 	jp TossItem
 
-.used_park_ball
+.used_park_ball:
 	ld hl, wParkBallsRemaining
 	dec [hl]
 	ret
 
-.used_safari_ball
+.used_safari_ball:
 	ld hl, wSafariBallsRemaining
 	dec [hl]
 	ret
@@ -754,370 +770,239 @@ BallMultiplierFunctionTable:
 	dbw DUSK_BALL,       DuskBallMultiplier
 	dbw LOVE_BALL,       LoveBallMultiplier
 	dbw PARK_BALL,       ParkBallMultiplier
+	dbw FRIEND_BALL,     FriendBallMultiplier
 	db -1 ; end
 
 SafariBallMultiplier:
-; multiply catch rate by 4
+ParkBallMultiplier: ; 1.5->8
+; multiply catch rate by 8 ;4
 	sla b
-	jr c, .max
+	jr c, .max_8
+	sla b
+	jr c, .max_8
 	sla b
 	ret nc
-.max
+.max_8
 	ld b, $ff
 	ret
 
 UltraBallMultiplier:
-; multiply catch rate by 2
+; multiply catch rate by 4 ; 2
+	sla b
+	jr c, .max_4x
 	sla b
 	ret nc
+.max_4x
 	ld b, $ff
 	ret
 
 GreatBallMultiplier:
-ParkBallMultiplier:
-; multiply catch rate by 1.5
-	ld a, b
-	srl a
-	add b
-	ld b, a
+; multiply catch rate by 2 ; 1.5
+	sla b
 	ret nc
 	ld b, $ff
 	ret
-
-HeavyBall_GetDexEntryBank:
-	push hl
-	push de
-	ld a, [wEnemyMonSpecies]
-	dec a
-	rlca
-	rlca
-	maskbits NUM_DEX_ENTRY_BANKS
-	ld hl, .PokedexEntryBanks
-	ld d, 0
-	ld e, a
-	add hl, de
-	ld a, [hl]
-	pop de
-	pop hl
-	ret
-
-.PokedexEntryBanks:
-	db BANK("Pokedex Entries 001-064")
-	db BANK("Pokedex Entries 065-128")
-	db BANK("Pokedex Entries 129-192")
-	db BANK("Pokedex Entries 193-251")
 
 HeavyBallMultiplier:
-; subtract 20 from catch rate if weight < 102.4 kg
-; else add 0 to catch rate if weight < 204.8 kg
-; else add 20 to catch rate if weight < 307.2 kg
-; else add 30 to catch rate if weight < 409.6 kg
-; else add 40 to catch rate
-	ld a, [wEnemyMonSpecies]
-	ld hl, PokedexDataPointerTable
-	dec a
-	ld e, a
-	ld d, 0
-	add hl, de
-	add hl, de
-	ld a, BANK(PokedexDataPointerTable)
-	call GetFarWord
+; Check enemy Type 1
+	ld a, [wEnemyMonType1]
+	cp ROCK
+	jr z, .heavy_match
+	cp GROUND
+	jr z, .heavy_match
+	cp STEEL
+	jr z, .heavy_match
 
-.SkipText:
-	call HeavyBall_GetDexEntryBank
-	call GetFarByte
-	inc hl
-	cp "@"
-	jr nz, .SkipText
-
-	call HeavyBall_GetDexEntryBank
-	push bc
-	inc hl
-	inc hl
-	call GetFarWord
-
-	srl h
-	rr l
-	ld b, h
-	ld c, l
-
-rept 4
-	srl b
-	rr c
-endr
-	call .subbc
-
-	srl b
-	rr c
-	call .subbc
-
-	ld a, h
-	pop bc
-	jr .compare
-
-.subbc
-	; subtract bc from hl
-	push bc
-	ld a, b
-	cpl
-	ld b, a
-	ld a, c
-	cpl
-	ld c, a
-	inc bc
-	add hl, bc
-	pop bc
-	ret
-
-.compare
-	ld c, a
-	cp HIGH(1024) ; 102.4 kg
-	jr c, .lightmon
-
-	ld hl, .WeightsTable
-.lookup
-	ld a, c
-	cp [hl]
-	jr c, .heavymon
-	inc hl
-	inc hl
-	jr .lookup
-
-.heavymon
-	inc hl
-	ld a, b
-	add [hl]
-	ld b, a
+; Check enemy Type 2
+	ld a, [wEnemyMonType2]
+	cp ROCK
+	jr z, .heavy_match
+	cp GROUND
+	jr z, .heavy_match
+	cp STEEL
+	jr z, .heavy_match
+	ret ; If they hadn't matched by now, we're done.
+	
+.heavy_match
+	sla b
+	jr c, .heavy_max
+	sla b
+	jr c, .heavy_max
+	sla b
 	ret nc
+.heavy_max
 	ld b, $ff
 	ret
 
-.lightmon
-	ld a, b
-	sub 20
-	ld b, a
-	ret nc
-	ld b, $1
-	ret
-
-.WeightsTable:
-; weight factor, boost
-	db HIGH(2048),   0
-	db HIGH(3072),  20
-	db HIGH(4096),  30
-	db HIGH(65280), 40
-
-LureBallMultiplier:
-; multiply catch rate by 3 if this is a fishing rod battle
-	ld a, [wBattleType]
-	cp BATTLETYPE_FISH
-	ret nz
-
-	ld a, b
-	add a
-	jr c, .max
-
-	add b
-	jr nc, .done
-.max
-	ld a, $ff
-.done
-	ld b, a
-	ret
-
+;LureBallMultiplier:
 NetBallMultiplier:
 ; Check enemy Type 1
-	ld hl, wEnemyMonType1
-	ld a, [hli]
+	ld a, [wEnemyMonType1]
 	cp WATER
-	jr z, .type_match
+	jr z, .net_match
 	cp BUG
-	jr z, .type_match
+	jr z, .net_match
+
 ; Check enemy Type 2
-	ld a, [hl]
+	ld a, [wEnemyMonType2]
 	cp WATER
-	jr z, .type_match
+	jr z, .net_match
 	cp BUG
-;	jr z, .type_match
-	ret nz ; If they hadn't matched by now, we're done.
+	jr z, .net_match
+	ret ; If they hadn't matched by now, we're done.
 
-.type_match
+.net_match
 	sla b
-	jr c, .max
+	jr c, .net_max
+	sla b
+	jr c, .net_max
 	sla b
 	ret nc
-.max
+.net_max
 	ld b, $ff
 	ret
 
-MoonBallMultiplier:
-	push bc
-	ld a, [wTempEnemyMonSpecies]
-	dec a
-	ld c, a
-	ld b, 0
-	ld hl, EvosAttacksPointers
-	add hl, bc
-	add hl, bc
-	ld a, BANK(EvosAttacksPointers)
-	call GetFarWord
-	pop bc
-
-	push bc
-	ld a, BANK("Evolutions and Attacks")
-	call GetFarByte
-	cp EVOLVE_ITEM
-	pop bc
-	ret nz
-
-	inc hl
-;	inc hl
-;	inc hl
-
-	push bc
-	ld a, BANK("Evolutions and Attacks")
-	call GetFarByte
-;	cp MOON_STONE_RED ; BURN_HEAL
-	cp MOON_STONE
-	pop bc
-	ret nz
-
-	sla b
-	jr c, .max
-	sla b
-	jr nc, .done
-.max
-	ld b, $ff
-.done
-	ret
-
+;MoonBallMultiplier:
 DuskBallMultiplier:
-	ld a, [wTimeOfDay]
-	cp NITE_F
-	jr z, .nite_or_cave
-	call GetMapEnvironment
-	cp CAVE
-	ret nz ; If its not NITE_F and we're not in a CAVE, we're done.
+; Check enemy Type 1
+	ld a, [wEnemyMonType1]
+	cp DARK
+	jr z, .dusk_match
+	cp GHOST
+	jr z, .dusk_match
+	cp POISON
+	jr z, .dusk_match
 
-.nite_or_cave
+; Check enemy Type 2
+	ld a, [wEnemyMonType2]
+	cp DARK
+	jr z, .dusk_match
+	cp GHOST
+	jr z, .dusk_match
+	cp POISON
+	jr z, .dusk_match
+	ret ; If they hadn't matched by now, we're done.
+
+.dusk_match
 	sla b
-	jr c, .max
+	jr c, .dusk_max
+	sla b
+	jr c, .dusk_max
 	sla b
 	ret nc
-.max
+.dusk_max
 	ld b, $ff
 	ret
 
 LoveBallMultiplier:
-;	; does species match?
-;	ld a, [wTempEnemyMonSpecies]
-;	ld c, a
-;	ld a, [wTempBattleMonSpecies]
-;	cp c
-;	ret nz
+; Check enemy Type 1
+	ld a, [wEnemyMonType1]
+	cp PSYCHIC_TYPE
+	jr z, .love_match
+	cp FIRE
+	jr z, .love_match
+	cp DRAGON
+	jr z, .love_match
 
-	; check player mon species
-	push bc
-	ld a, [wTempBattleMonSpecies]
-	ld [wCurPartySpecies], a
-	xor a ; PARTYMON
-	ld [wMonType], a
-	ld a, [wCurBattleMon]
-	ld [wCurPartyMon], a
-	farcall GetGender
-	jr c, .done1 ; no effect on genderless
+; Check enemy Type 2
+	ld a, [wEnemyMonType2]
+	cp PSYCHIC_TYPE
+	jr z, .love_match
+	cp FIRE
+	jr z, .love_match
+	cp DRAGON
+	jr z, .love_match
+	ret ; If they hadn't matched by now, we're done.
 
-	ld d, 0 ; male
-	jr nz, .got_player_gender
-	inc d   ; female
-.got_player_gender
-
-	; check wild mon species
-	push de
-	ld a, [wTempEnemyMonSpecies]
-	ld [wCurPartySpecies], a
-	ld a, WILDMON
-	ld [wMonType], a
-	farcall GetGender
-	jr c, .done2 ; no effect on genderless
-
-	ld d, 0 ; male
-	jr nz, .got_wild_gender
-	inc d   ; female
-.got_wild_gender
-
-	ld a, d
-	pop de
-	cp d
-	pop bc
-	ret z
-
-	; does species match?
-	ld a, [wTempEnemyMonSpecies]
-	ld c, a
-	ld a, [wTempBattleMonSpecies]
-	cp c
-	jr nz, .not_same_species
-
+.love_match
 	sla b
-	jr c, .max
-
-.not_same_species
+	jr c, .love_max
 	sla b
-	jr c, .max
+	jr c, .love_max
 	sla b
 	ret nc
-.max
+.love_max
 	ld b, $ff
 	ret
-
-.done2
-	pop de
-
-.done1
-	pop bc
-	ret
-
+	
 FastBallMultiplier:
-	ld a, [wTempEnemyMonSpecies]
-	ld [wCurSpecies], a
-	call GetBaseData
-	ld a, [wBaseSpeed]
-	cp 100
-	ret nc
+; Check enemy Type 1
+	ld a, [wEnemyMonType1]
+	cp ELECTRIC
+	jr z, .fast_match
+	cp FIGHTING
+	jr z, .fast_match
+
+; Check enemy Type 2
+	ld a, [wEnemyMonType2]
+	cp ELECTRIC
+	jr z, .fast_match
+	cp FIGHTING
+	jr z, .fast_match
+	ret ; If they hadn't matched by now, we're done.
+
+.fast_match
 	sla b
-	jr c, .max
+	jr c, .fast_max
+	sla b
+	jr c, .fast_max
 	sla b
 	ret nc
-.max
+.fast_max
 	ld b, $ff
 	ret
 
 LevelBallMultiplier:
-; multiply catch rate by 8 if player mon level / 4 > enemy mon level
-; multiply catch rate by 4 if player mon level / 2 > enemy mon level
-; multiply catch rate by 2 if player mon level > enemy mon level
-	ld a, [wBattleMonLevel]
-	ld c, a
-	ld a, [wEnemyMonLevel]
-	cp c
-	ret nc ; if player is lower level, we're done here
-	sla b
-	jr c, .max
+; Check enemy Type 1
+	ld a, [wEnemyMonType1]
+	cp FLYING
+	jr z, .level_match
+	cp ICE
+	jr z, .level_match
 
-	srl c
-	cp c
-	ret nc ; if player/2 is lower level, we're done here
-	sla b
-	jr c, .max
+; Check enemy Type 2
+	ld a, [wEnemyMonType2]
+	cp FLYING
+	jr z, .level_match
+	cp ICE
+	jr z, .level_match
+	ret ; If they hadn't matched by now, we're done.
 
-	srl c
-	cp c
-	ret nc ; if player/4 is lower level, we're done here
+.level_match
+	sla b
+	jr c, .level_max
+	sla b
+	jr c, .level_max
 	sla b
 	ret nc
+.level_max
+	ld b, $ff
+	ret
+	
+FriendBallMultiplier:
+; Check enemy Type 1
+	ld a, [wEnemyMonType1]
+	cp GRASS
+	jr z, .friend_match
+	cp NORMAL
+	jr z, .friend_match
 
-.max
+; Check enemy Type 2
+	ld a, [wEnemyMonType2]
+	cp GRASS
+	jr z, .friend_match
+	cp NORMAL
+	jr z, .friend_match
+	ret ; If they hadn't matched by now, we're done.
+
+.friend_match
+	sla b
+	jr c, .friend_max
+	sla b
+	jr c, .friend_max
+	sla b
+	ret nc
+.friend_max
 	ld b, $ff
 	ret
 
@@ -1224,6 +1109,38 @@ EvoStoneEffect:
 	xor a
 	ld [wItemEffectSucceeded], a
 	ret
+	
+; New EXP ALL code
+ExpAllEffect:
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
+	jr nz, .turn_off
+
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, SET_FLAG
+	call EventFlagAction
+	ld hl, .TurnedOnText
+	jp PrintText
+
+.turn_off
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, RESET_FLAG
+	call EventFlagAction
+	ld hl, .TurnedOffText
+	jp PrintText
+
+.TurnedOnText:
+	text "Turned ON the"
+	line "EXP. ALL."
+	prompt
+
+.TurnedOffText:
+	text "Turned OFF the"
+	line "EXP. ALL."
+	prompt
 
 VitaminEffect:
 	ld b, PARTYMENUACTION_HEALING_ITEM
@@ -1240,10 +1157,10 @@ VitaminEffect:
 
 	add hl, bc
 	ld a, [hl]
-	cp 100
+	cp 200 ; 100
 	jr nc, NoEffectMessage
 
-	add 10
+	add 20 ; 10
 	ld [hl], a
 	call UpdateStatsAfterItem
 
@@ -2431,9 +2348,13 @@ RestorePPEffect:
 
 	ld bc, MON_PP - MON_MOVES
 	add hl, bc
+	
+	; --- FIXED USABILITY CHECK ---
 	ld a, [hl]
-	cp PP_UP_MASK
-	jr c, .do_ppup
+	and $c0           ; Isolate the current PP Up application count bits
+	cp $c0            ; Check if all 3 PP Ups are already applied
+	jr c, .do_ppup    ; If less than 3 applied ($c0), proceed to use the item
+	; ------------------------------
 
 .CantUsePPUpOnSketch:
 	ld hl, PPIsMaxedOutText
@@ -2442,11 +2363,11 @@ RestorePPEffect:
 
 .do_ppup
 	ld a, [hl]
-	add PP_UP_ONE
+	or $c0            ; Force the top 2 bits to 11 (Applies 3 PP Ups instantly)
 	ld [hl], a
 	ld a, TRUE
 	ld [wUsePPUp], a
-	call ApplyPPUp
+	call ApplyPPUp    ; Recalculates and increases the actual Max PP stat
 	call Play_SFX_FULL_HEAL
 
 	ld hl, PPsIncreasedText
@@ -3057,3 +2978,87 @@ GetMthMoveOfCurrentMon:
 	ld b, 0
 	add hl, bc
 	ret
+
+EvenlyDivideExpAmongParticipants::
+; count number of battle participants
+	ld a, [wBattleParticipantsNotFainted]
+	ld b, a
+	ld c, PARTY_LENGTH
+	ld d, 0
+.count_loop
+	xor a
+	srl b
+	adc d
+	ld d, a
+	dec c
+	jr nz, .count_loop
+	cp 2
+	ret c
+
+	ld [wTempByteValue], a
+	ld hl, wEnemyMonBaseStats
+	ld c, wEnemyMonEnd - wEnemyMonBaseStats
+.base_stat_division_loop
+	xor a
+	ldh [hDividend + 0], a
+	ld a, [hl]
+	ldh [hDividend + 1], a
+	ld a, [wTempByteValue]
+	ldh [hDivisor], a
+	ld b, 2
+	call Divide
+	ldh a, [hQuotient + 3]
+	ld [hli], a
+	dec c
+	jr nz, .base_stat_division_loop
+	ret
+	
+_IsAnyMonHoldingExpShare::
+	ld d, 0
+	xor a
+	ret
+
+BoosterChipEffect:
+	ld b, PARTYMENUACTION_HEALING_ITEM
+	call UseItem_SelectMon
+	jp c, RareCandy_StatBooster_ExitMenu
+
+; Block traded Pokemon (they already get boosted EXP)
+	ld a, MON_ID
+	call GetPartyParamLocation
+	ld a, [wPlayerID]
+	cp [hl]
+	jp nz, NoEffectMessage
+	inc hl
+	ld a, [wPlayerID + 1]
+	cp [hl]
+	jp nz, NoEffectMessage
+
+; Check bit 3 of MON_POKERUS (unused bit, saved in PC boxes)
+	ld a, MON_POKERUS
+	call GetPartyParamLocation
+	bit 3, [hl]
+	jp nz, NoEffectMessage
+
+	set 3, [hl]
+
+; Load selected Pokemon's nickname into wStringBuffer1
+	ld a, [wCurPartyMon]
+	ld hl, wPartyMonNicknames
+	call GetNickname
+
+	call Play_SFX_FULL_HEAL
+
+	ld hl, .UsedBoosterChipText
+	call PrintText
+
+	ld c, HAPPINESS_USEDITEM
+	farcall ChangeHappiness
+
+	jp UseDisposableItem
+
+.UsedBoosterChipText:
+	text_ram wStringBuffer1
+	text "'s EXP."
+	line "gain was boosted!"
+	prompt

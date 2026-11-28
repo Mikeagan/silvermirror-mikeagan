@@ -33,7 +33,7 @@ Route36_RawstBerry:
 	getitemname STRING_BUFFER_3, RAWST_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem RAWST_BERRY, 2
+	giveitem RAWST_BERRY, 5
 	iffalse .Route36_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE36_RAWST_BERRY

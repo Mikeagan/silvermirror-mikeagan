@@ -30,7 +30,7 @@
 	const EVENT_GOT_TM81_X_SCISSOR
 	const EVENT_GOT_TM43_SKY_ATTACK
 	const EVENT_GOT_TM80_ANCIENTPOWER
-	const_skip ;WHIRLPOOL PAGER, TM_WHIRLPOOL
+	const EVENT_EXP_BOOST_ACTIVE ;NEW EXP BOOST TOGGLE ;WHIRLPOOL PAGER REPLACED TM_WHIRLPOOL
 	const EVENT_GOT_TM59_DRAGON_PULSE
 ; used 8
 
@@ -99,8 +99,8 @@
 	const EVENT_GOT_BERSERK_GENE
 	const EVENT_GOT_KANTO_LUCKY_EGG
 	const EVENT_GOT_WIDE_LENS
-	const_skip ;unused
-	const_skip ;unused
+	const EVENT_EXP_ALL_ACTIVE
+	const EVENT_GOT_EXP_ALL
 	const_skip ;unused
 ; used 25
 
@@ -981,6 +981,7 @@
 	const EVENT_CERULEAN_CAVE_2F_HIDDEN_PP_UP              ;done
 	const EVENT_CERULEAN_CAVE_B1F_HIDDEN_ULTRA_BALL        ;done
 	const EVENT_MT_MOON_SQUARE_HIDDEN_MOON_STONE           ;done (respawns)
+	const EVENT_CELADON_CAFE_HIDDEN_LEFTOVERS              ;new in silvermirror
 ; used 67
 ; running total 967
 ;

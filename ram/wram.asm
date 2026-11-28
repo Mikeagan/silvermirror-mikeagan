@@ -127,7 +127,8 @@ wDebugFlags:: db
 wGameLogicPaused:: db
 wSpriteUpdatesEnabled:: db
 
-wUnusedScriptByte:: db
+wUnusedScriptByte::
+wSelectHoldCounter:: db		; 2nd registered item (hold select)
 
 wMapTimeOfDay:: db
 
@@ -2287,8 +2288,6 @@ NEXTU
 ; phone script data
 wCheckedTime:: db
 wPhoneListIndex:: db
-wNumAvailableCallers:: db
-wAvailableCallers:: ds CONTACT_LIST_SIZE
 
 NEXTU
 ; phone caller contact
@@ -3104,7 +3103,7 @@ wPokegearFlags::
 	db
 wRadioTuningKnob:: db
 wLastDexMode:: db
-	ds 1
+wRegisteredItem2:: db ; <--- Replaces the `ds 1` padding right before wWhichRegisteredItem
 wWhichRegisteredItem:: db
 wRegisteredItem:: db
 
@@ -3335,7 +3334,7 @@ wBuenasPassword:: db
 wBlueCardBalance:: db
 wDailyRematchFlags:: ds 4
 wDailyPhoneItemFlags:: ds 4
-wDailyPhoneTimeOfDayFlags:: ds 4
+	ds 4
 wKenjiBreakTimer:: ds 2 ; Kenji
 wYanmaMapGroup:: db
 wYanmaMapNumber:: db
@@ -3364,7 +3363,7 @@ wParkBallsRemaining::
 wSafariBallsRemaining:: db
 wSafariTimeRemaining:: dw
 
-wPhoneList:: ds CONTACT_LIST_SIZE + 1
+wPhoneList:: ds 11 ; CONTACT_LIST_SIZE + 1
 
 	ds 16 ;22 ;removed to make room to expand CONTACT_LIST_SIZE
 

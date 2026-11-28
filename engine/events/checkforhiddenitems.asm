@@ -73,6 +73,10 @@ CheckForHiddenItems:
 
 .itemnearby
 	pop hl
+	call .GetFarByte
+	ld [wStringBuffer1 + 1], a ; Save Item Y
+	call .GetFarByte
+	ld [wStringBuffer1], a     ; Save Item X
 	scf
 	ret
 

@@ -9,6 +9,7 @@ VermilionMartClerkScript:
 	faceplayer
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .BallsSeven
 	ifgreater 4, .BallsFive
 	ifequal 3, .BallsThree
 	pokemart MARTTYPE_STANDARD, MART_BALLS_ONE
@@ -22,13 +23,18 @@ VermilionMartClerkScript:
 	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
 	closetext
 	end
+.BallsSeven
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
+	closetext
+	end
 
 VermilionMartMedScript:
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .MedEight
 	ifgreater 5, .MedSix
 	ifequal 4, .MedFour
-	ifequal 2, .MedTwo
+	ifgreater 1, .MedTwo
 	pokemart MARTTYPE_STANDARD, MART_MED_ZERO
 	closetext
 	end
@@ -42,6 +48,10 @@ VermilionMartMedScript:
 	end
 .MedSix
 	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	closetext
+	end
+.MedEight
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

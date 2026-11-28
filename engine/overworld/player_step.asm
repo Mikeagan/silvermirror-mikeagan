@@ -32,6 +32,10 @@ _HandlePlayerStep::
 	ld a, [wPlayerBGMapOffsetY]
 	sub e
 	ld [wPlayerBGMapOffsetY], a
+	
+	; --- INJECT EVERSTONE POKERUS HOOK HERE ---
+	;call NuggetPokerusCheck
+	; ------------------------------------------
 	ret
 
 ScrollScreen::
@@ -267,4 +271,46 @@ UpdateOverworldMap:
 	ld [hli], a
 	ret nc
 	inc [hl]
+	ret
+
+NuggetPokerusCheck:
+	ld a, [wPartyCount]
+	and a
+	ret z ; Exit if party is empty (safety check)
+	ld b, a ; b = loop counter (number of Pokémon in party)
+	ld c, 0 ; c = current party member index (0 to 5)
+
+.loop
+	push bc ; Save our loop counters
+	
+	; Get pointer to the current party member's held item slot
+	ld a, c
+	ld hl, wPartyMon1Item
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes ; hl now points to wPartyMonXItem
+	
+	; Check if holding NUGGET
+	ld a, [hl]
+	cp NUGGET
+	jr nz, .next ; If not holding NUGGET, skip to next Pokémon
+	
+	; Calculate pointer to wPartyMonXPokerus
+	; In Pokecrystal struct, MON_POKERUS is after MON_ITEM
+	ld bc, MON_POKERUS - MON_ITEM
+	add hl, bc ; hl now points to wPartyMonXPokerus
+	
+	; Check if already infected
+	ld a, [hl]
+	and a
+	jr nz, .next ; Skip if they already have/had Pokérus (don't overwrite)
+	
+	; Give Pokérus (Strain 1, 3 Days duration)
+	ld a, $13 
+	ld [hl], a
+
+.next
+	pop bc ; Restore loop counters
+	inc c ; Move to next party member index
+	dec b ; Decrease remaining loops
+	jr nz, .loop ; Repeat until all party members are checked
 	ret

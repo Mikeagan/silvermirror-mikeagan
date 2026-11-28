@@ -8,13 +8,13 @@ AzaleaMart_MapScripts:
 AzaleaMartClerkScript:
 	faceplayer
 	opentext
-	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
 	closetext
 	end
 
 AzaleaMartMedScript:
 	opentext
-	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

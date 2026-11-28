@@ -9,6 +9,7 @@ PewterMartClerkScript:
 	faceplayer
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .BallsSeven
 	ifgreater 4, .BallsFive
 	ifequal 3, .BallsThree
 	ifequal 1, .BallsOne
@@ -27,10 +28,15 @@ PewterMartClerkScript:
 	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
 	closetext
 	end
+.BallsSeven
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
+	closetext
+	end
 
 PewterMartMedScript:
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .MedEight
 	ifgreater 5, .MedSix
 	ifequal 4, .MedFour
 	ifequal 2, .MedTwo
@@ -47,6 +53,10 @@ PewterMartMedScript:
 	end
 .MedSix
 	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	closetext
+	end
+.MedEight
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

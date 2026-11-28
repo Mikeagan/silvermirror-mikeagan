@@ -344,25 +344,28 @@ Pack:
 
 MenuHeader_UsableKeyItem:
 	db MENU_BACKUP_TILES ; flags
-	menu_coords 13, 1, SCREEN_WIDTH - 1, TEXTBOX_Y - 1
+	menu_coords 9, 0, SCREEN_WIDTH - 1, TEXTBOX_Y - 1
 	dw .MenuData
 	db 1 ; default option
 
 .MenuData:
 	db STATICMENU_CURSOR | STATICMENU_NO_TOP_SPACING ; flags
-	db 5 ; items
+	db 6 ; items
 	db "USE@"
 	db "GIVE@"
 	db "TOSS@"
-	db "SEL@"
+	db "TAP.SEL@"
+	db "HOLD.SEL@"
 	db "QUIT@"
 
 Jumptable_UseGiveTossRegisterQuit:
 	dw UseItem
 	dw GiveItem
 	dw TossMenu
-	dw RegisterItem
+	dw RegisterTapItem
+	dw RegisterHoldItem
 	dw QuitItemSubmenu
+
 
 MenuHeader_UsableItem:
 	db MENU_BACKUP_TILES ; flags
@@ -402,41 +405,46 @@ Jumptable_UseQuit:
 
 MenuHeader_UnusableKeyItem:
 	db MENU_BACKUP_TILES ; flags
-	menu_coords 13, 5, SCREEN_WIDTH - 1, TEXTBOX_Y - 1
-	dw .MenuData
-	db 1 ; default option
-
-.MenuData:
-	db STATICMENU_CURSOR | STATICMENU_NO_TOP_SPACING ; flags
-	db 3 ; items
-	db "USE@"
-	db "SEL@"
-	db "QUIT@"
-
-Jumptable_UseRegisterQuit:
-	dw UseItem
-	dw RegisterItem
-	dw QuitItemSubmenu
-
-MenuHeader_HoldableKeyItem:
-	db MENU_BACKUP_TILES ; flags
-	menu_coords 13, 3, SCREEN_WIDTH - 1, TEXTBOX_Y - 1
+	menu_coords 9, 3, SCREEN_WIDTH - 1, TEXTBOX_Y - 1
 	dw .MenuData
 	db 1 ; default option
 
 .MenuData:
 	db STATICMENU_CURSOR | STATICMENU_NO_TOP_SPACING ; flags
 	db 4 ; items
+	db "USE@"
+	db "TAP.SEL@"
+	db "HOLD.SEL@"
+	db "QUIT@"
+
+Jumptable_UseRegisterQuit:
+	dw UseItem
+	dw RegisterTapItem
+	dw RegisterHoldItem
+	dw QuitItemSubmenu
+
+MenuHeader_HoldableKeyItem:
+	db MENU_BACKUP_TILES ; flags
+	menu_coords 9, 1, SCREEN_WIDTH - 1, TEXTBOX_Y - 1
+	dw .MenuData
+	db 1 ; default option
+
+.MenuData:
+	db STATICMENU_CURSOR | STATICMENU_NO_TOP_SPACING ; flags
+	db 5 ; items
 	db "GIVE@"
 	db "TOSS@"
-	db "SEL@"
+	db "TAP.SEL@"
+	db "HOLD.SEL@"
 	db "QUIT@"
 
 Jumptable_GiveTossRegisterQuit:
 	dw GiveItem
 	dw TossMenu
-	dw RegisterItem
+	dw RegisterTapItem
+	dw RegisterHoldItem
 	dw QuitItemSubmenu
+
 
 MenuHeader_HoldableItem:
 	db MENU_BACKUP_TILES ; flags
@@ -561,11 +569,32 @@ ResetPocketCursorPositions: ; unreferenced
 	ld [wKeyItemsPocketScrollPosition], a
 	ret
 
-RegisterItem:
+RegisterTapItem:
 	farcall CheckSelectableItem
 	ld a, [wItemAttributeValue]
 	and a
-	jr nz, .cant_register
+	jp nz, RegisterItem_CantRegister ; <-- Changed from jr nz to jp nz
+
+	; If this item is ALREADY registered to TAP.SEL, unregister it
+	ld a, [wCurItem]
+	ld b, a
+	ld a, [wRegisteredItem]
+	cp b
+	jr nz, .check_hold
+	xor a
+	ld [wRegisteredItem], a
+	ld [wWhichRegisteredItem], a
+	jp RegisterItem_UnregisterSFX ; <-- Keep as jp
+
+.check_hold
+	; If this item was registered to HOLD.SEL, clear HOLD.SEL first
+	ld a, [wRegisteredItem2]
+	cp b
+	jr nz, .set_tap
+	xor a
+	ld [wRegisteredItem2], a
+
+.set_tap
 	ld a, [wCurPocket]
 	rrca
 	rrca
@@ -578,6 +607,43 @@ RegisterItem:
 	ld [wWhichRegisteredItem], a
 	ld a, [wCurItem]
 	ld [wRegisteredItem], a
+	jp RegisterItem_PlaySFX ; <-- Keep as jp
+
+RegisterHoldItem:
+	farcall CheckSelectableItem
+	ld a, [wItemAttributeValue]
+	and a
+	jr nz, RegisterItem_CantRegister
+
+	; Only allow Key Items in HOLD.SEL
+	ld a, [wCurPocket]
+	cp KEY_ITEM_POCKET
+	jr nz, RegisterItem_CantRegister
+
+	; If this item is ALREADY registered to HOLD.SEL, unregister it
+	ld a, [wCurItem]
+	ld b, a
+	ld a, [wRegisteredItem2]
+	cp b
+	jr nz, .check_tap
+	xor a
+	ld [wRegisteredItem2], a
+	jr RegisterItem_UnregisterSFX
+
+.check_tap
+	; If this item was registered to TAP.SEL, clear TAP.SEL first
+	ld a, [wRegisteredItem]
+	cp b
+	jr nz, .set_hold
+	xor a
+	ld [wRegisteredItem], a
+	ld [wWhichRegisteredItem], a
+
+.set_hold
+	ld a, [wCurItem]
+	ld [wRegisteredItem2], a
+
+RegisterItem_PlaySFX:
 	call Pack_GetItemName
 	ld de, SFX_FULL_HEAL
 	call WaitPlaySFX
@@ -585,10 +651,19 @@ RegisterItem:
 	call Pack_PrintTextNoScroll
 	ret
 
-.cant_register
+RegisterItem_UnregisterSFX:
+	call Pack_GetItemName
+	ld de, SFX_MENU
+	call WaitPlaySFX
+	ld hl, UnregisteredItemText
+	call Pack_PrintTextNoScroll
+	ret
+
+RegisterItem_CantRegister:
 	ld hl, CantRegisterText
 	call Pack_PrintTextNoScroll
 	ret
+
 
 GiveItem:
 	ld a, [wPartyCount]
@@ -1697,6 +1772,10 @@ YouDontHaveAMonText:
 
 RegisteredItemText:
 	text_far _RegisteredItemText
+	text_end
+
+UnregisteredItemText:
+	text_far _UnregisteredItemText
 	text_end
 
 CantRegisterText:

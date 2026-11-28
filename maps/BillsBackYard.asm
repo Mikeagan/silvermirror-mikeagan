@@ -24,7 +24,7 @@ BillsBackYard_LumBerry:
 	getitemname STRING_BUFFER_3, LUM_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem LUM_BERRY, 2
+	giveitem LUM_BERRY, 5
 	iffalse .BillsBackYard_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear BILLSBACKYARD_LUM_BERRY

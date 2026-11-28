@@ -3,13 +3,13 @@
 	const OPT_TEXT_SPEED    ; 0
 	const OPT_BATTLE_SCENE  ; 1
 	const OPT_BATTLE_STYLE  ; 2
-	const OPT_PHYS_SPEC
-	const OPT_SOUND         ; 3
-;	const OPT_PRINT         ; 4
-	const OPT_MENU_CLOCK    ; 5 ;OPT_MENU_ACCOUNT  ; 5
+	const OPT_PHYS_SPEC     ; 3
+	const OPT_SOUND         ; 4 (Difficulty)
+	const OPT_MENU_CLOCK    ; 5
 	const OPT_FRAME         ; 6
-	const OPT_CANCEL        ; 7
-DEF NUM_OPTIONS EQU const_value ; 8
+	const OPT_EXP_BOOST     ; 7
+	const OPT_CANCEL        ; 8
+DEF NUM_OPTIONS EQU const_value ; 9
 
 _Option:
 	call ClearJoypad
@@ -22,7 +22,7 @@ _Option:
 	ld b, SCREEN_HEIGHT - 2
 	ld c, SCREEN_WIDTH - 2
 	call Textbox
-	hlcoord 2, 2
+	hlcoord 2, 1 ; Changed from 2, 2 to fit 8 options
 	ld de, StringOptions
 	call PlaceString
 	xor a
@@ -41,6 +41,7 @@ _Option:
 	dec c
 	jr nz, .print_text_loop
 	call UpdateFrame ; display the frame type
+	call Options_ExpBoost ; display EXP Boost ON/OFF immediately on menu open
 
 	xor a
 	ld [wJumptableIndex], a
@@ -78,23 +79,21 @@ _Option:
 StringOptions:
 	db "Text Speed<LF>"
 	db "        :<LF>"
-	db "Battle Animation<LF>" ;"BATTLE SCENE<LF>"
+	db "Battle Animation<LF>"
 	db "        :<LF>"
 	db "Battle Style<LF>"
 	db "        :<LF>"
 	db "Phys/Special<LF>"
 	db "        :<LF>"
-;	db "SOUND<LF>"
-;	db "        :<LF>"
 	db "Difficulty Curve<LF>"
 	db "        :<LF>"
-;	db "PRINT<LF>"
-;	db "        :<LF>"
-	db "Menu Clock<LF>" ;"MENU ACCOUNT<LF>"
+	db "Menu Clock<LF>"
 	db "        :<LF>"
 	db "Frame Style<LF>"
 	db "        :TYPE<LF>"
+	db "EXP Boost:<LF>"
 	db "CONFIRM@"
+
 
 GetOptionPointer:
 	jumptable .Pointers, wJumptableIndex
@@ -110,6 +109,7 @@ GetOptionPointer:
 ;	dw Options_Print
 	dw Options_MenuClock ;Options_MenuAccount
 	dw Options_Frame
+	dw Options_ExpBoost
 	dw Options_Cancel
 
 	const_def
@@ -162,7 +162,7 @@ Options_TextSpeed:
 	ld e, [hl]
 	inc hl
 	ld d, [hl]
-	hlcoord 11, 3
+	hlcoord 11, 2
 	call PlaceString
 	and a
 	ret
@@ -243,7 +243,7 @@ Options_BattleScene:
 	ld de, .Off
 
 .Display:
-	hlcoord 11, 5
+	hlcoord 11, 4
 	call PlaceString
 	and a
 	ret
@@ -281,7 +281,7 @@ Options_BattleStyle:
 	ld de, .Set
 
 .Display:
-	hlcoord 11, 7
+	hlcoord 11, 6
 	call PlaceString
 	and a
 	ret
@@ -319,7 +319,7 @@ Options_Phys_Spec:
 	ld de, .Classic
 
 .Display:
-	hlcoord 11, 9 ;7
+	hlcoord 11, 8 ;7
 	call PlaceString
 	and a
 	ret
@@ -408,7 +408,7 @@ Options_Difficulty:
 .Save:
 	ld b, a
 	ld a, [wOptions2]
-	and $f0
+	and ~DIFFICULTY_MASK ; Preserves bit 3 (EXP_BOOST_OPT) as well as bits 4-7!
 	or b
 	ld [wOptions2], a
 
@@ -420,7 +420,7 @@ Options_Difficulty:
 	ld e, [hl]
 	inc hl
 	ld d, [hl]
-	hlcoord 11, 11
+	hlcoord 11, 10
 	call PlaceString
 	and a
 	ret
@@ -599,7 +599,7 @@ Options_MenuClock:
 	ld de, .On
 
 .Display:
-	hlcoord 11, 13
+	hlcoord 11, 12
 	call PlaceString
 	and a
 	ret
@@ -632,12 +632,52 @@ Options_Frame:
 	ld [hl], a
 UpdateFrame:
 	ld a, [wTextboxFrame]
-	hlcoord 16, 15 ; where on the screen the number is drawn
+	hlcoord 16, 14 ; where on the screen the number is drawn
 	add "1"
 	ld [hl], a
 	call LoadFontsExtra
 	and a
 	ret
+
+Options_ExpBoost:
+	ld hl, wOptions2
+	ldh a, [hJoyPressed]
+	bit D_LEFT_F, a
+	jr nz, .LeftPressed
+	bit D_RIGHT_F, a
+	jr z, .NonePressed
+	bit EXP_BOOST_OPT, [hl]
+	jr nz, .ToggleOff
+	jr .ToggleOn
+
+.LeftPressed:
+	bit EXP_BOOST_OPT, [hl]
+	jr z, .ToggleOn
+	jr .ToggleOff
+
+.NonePressed:
+	bit EXP_BOOST_OPT, [hl]
+	jr nz, .ToggleOn
+	jr .ToggleOff
+
+.ToggleOn:
+	set EXP_BOOST_OPT, [hl] ; Bit 3 = 1 when ON
+	ld de, .On
+	jr .Display
+
+.ToggleOff:
+	res EXP_BOOST_OPT, [hl] ; Bit 3 = 0 when OFF
+	ld de, .Off
+
+.Display:
+	hlcoord 12, 15 ; Row 15 (right below Frame Style at 14)
+	call PlaceString
+	and a
+	ret
+
+.On:  db "ON @"
+.Off: db "OFF@"
+
 
 Options_Cancel:
 	ldh a, [hJoyPressed]
@@ -715,9 +755,16 @@ Options_UpdateCursorPosition:
 	add hl, de
 	dec c
 	jr nz, .loop
-	hlcoord 1, 2
+	hlcoord 1, 1 ; Changed from 1, 2 so the first option cursor sits on row 1
 	ld bc, 2 * SCREEN_WIDTH
 	ld a, [wJumptableIndex]
+	cp OPT_CANCEL ; Check if the cursor is on CONFIRM (index 8)
+	jr nz, .not_cancel
+	hlcoord 1, 16 ; Place CONFIRM cursor on row 16 instead of jumping 2 rows to row 17
+	ld [hl], "▶"
+	ret
+
+.not_cancel
 	call AddNTimes
 	ld [hl], "▶"
 	ret

@@ -23,7 +23,7 @@ Route2_PNKApricorn:
 	getitemname STRING_BUFFER_3, PNK_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem PNK_APRICORN
+	giveitem PNK_APRICORN, 5
 	iffalse .Route2_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE2_PNK_APRICORN

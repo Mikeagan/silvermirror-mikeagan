@@ -819,11 +819,11 @@ CheckMenuOW:
 	xor a
 	ldh [hMenuReturn], a
 	ldh [hUnusedByte], a
+
+	farcall CheckSelectHold
+	jr c, .Select
+
 	ldh a, [hJoyPressed]
-
-	bit SELECT_F, a
-	jr nz, .Select
-
 	bit START_F, a
 	jr z, .NoMenu
 
@@ -850,8 +850,13 @@ StartMenuScript:
 	sjump StartMenuCallback
 
 SelectMenuScript:
+	ifequal 2, .Slot2
 	callasm SelectMenu
 	sjump SelectMenuCallback
+.Slot2:
+	callasm SelectMenu2
+	sjump SelectMenuCallback
+
 
 StartMenuCallback:
 SelectMenuCallback:

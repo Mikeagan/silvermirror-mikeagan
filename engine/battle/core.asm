@@ -90,6 +90,7 @@ DoBattle:
 	call SlideBattlePicOut
 	call LoadTilemapToTempTilemap
 	call ResetBattleParticipants
+	farcall CheckNuggetPokerusOnBattleStart
 	call InitBattleMon
 	call ResetPlayerStatLevels
 	call SendOutMonText
@@ -2120,6 +2121,7 @@ HandleEnemyMonFaint:
 	call z, FaintYourPokemon
 	xor a
 	ld [wWhichMonFaintedFirst], a
+	farcall DropWildMonHeldItem ;wild pokemon will now drop items held.
 	call UpdateBattleStateAndExperienceAfterEnemyFaint
 	call CheckPlayerPartyForFitMon
 	ld a, d
@@ -2302,57 +2304,7 @@ ApplyExperienceAfterEnemyCaught:
 	ret
 
 IsAnyMonHoldingExpShare:
-	ld a, [wPartyCount]
-	ld b, a
-	ld hl, wPartyMon1
-	ld c, 1
-	ld d, 0
-.loop
-	push hl
-	push bc
-	ld bc, MON_HP
-	add hl, bc
-	ld a, [hli]
-	or [hl]
-	pop bc
-	pop hl
-	jr z, .next
-
-	push hl
-	push bc
-	ld bc, MON_ITEM
-	add hl, bc
-	pop bc
-	ld a, [hl]
-	pop hl
-
-	cp EXP_SHARE
-	jr nz, .next
-	ld a, d
-	or c
-	ld d, a
-
-.next
-	sla c
-	push de
-	ld de, PARTYMON_STRUCT_LENGTH
-	add hl, de
-	pop de
-	dec b
-	jr nz, .loop
-
-	ld a, d
-	ld e, 0
-	ld b, PARTY_LENGTH
-.loop2
-	srl a
-	jr nc, .okay
-	inc e
-
-.okay
-	dec b
-	jr nz, .loop2
-	ld a, e
+	farcall _IsAnyMonHoldingExpShare
 	and a
 	ret
 
@@ -7601,7 +7553,11 @@ GiveExperiencePoints:
 	bit 0, a
 	ret nz
 
-	call .EvenlyDivideExpAmongParticipants
+	ld a, [wBattleParticipantsNotFainted]
+	and a
+	ret z
+
+	;farcall EvenlyDivideExpAmongParticipants ;call .EvenlyDivideExpAmongParticipants
 	xor a
 	ld [wCurPartyMon], a
 	ld bc, wPartyMon1Species
@@ -7622,10 +7578,40 @@ GiveExperiencePoints:
 	predef SmallFarFlagAction
 	ld a, c
 	and a
-	pop bc
-	jp z, .next_mon
+	jr nz, .participant_ok
 
-; give stat exp
+; Check if EXP. ALL is active
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
+	jr nz, .bench_exp
+
+; Otherwise, check if this mon is holding EXP_SHARE
+	pop bc
+	push bc
+	ld hl, MON_ITEM
+	add hl, bc
+	ld a, [hl]
+	cp EXP_SHARE
+	pop bc
+	jp nz, .next_mon
+	ld a, 1
+	jr .set_bench_flag
+
+.bench_exp
+	pop bc
+	ld a, 1
+	jr .set_bench_flag
+	
+.participant_ok
+	pop bc
+	xor a
+.set_bench_flag
+	ld [wTempByteValue], a
+
+.give_stat_exp ; give stat exp
 	ld hl, MON_STAT_EXP + 1
 	add hl, bc
 	ld d, h
@@ -7701,6 +7687,12 @@ GiveExperiencePoints:
 	inc hl
 	ld a, [wPlayerID + 1]
 	cp [hl]
+	jr nz, .boosted
+
+; Check if Booster Chip was used on this Pokemon
+	ld hl, MON_POKERUS
+	add hl, bc
+	bit 3, [hl]
 	ld a, 0
 	jr z, .no_boost
 
@@ -7721,10 +7713,65 @@ GiveExperiencePoints:
 	ld a, [hl]
 	cp LUCKY_EGG
 	call z, BoostExp
+
+; Optional EXP Boost (2x Multiplier via Options Menu)
+	ld a, [wOptions2]
+	bit EXP_BOOST_OPT, a
+	jr z, .no_optional_boost
+
+	ldh a, [hQuotient + 3]
+	sla a
+	ldh [hQuotient + 3], a
+	ldh a, [hQuotient + 2]
+	rl a
+	ldh [hQuotient + 2], a
+	ldh a, [hQuotient + 1]
+	rl a
+	ldh [hQuotient + 1], a
+
+.no_optional_boost
+	ld a, [wTempByteValue]
+	and a
+	jr z, .not_bench_mon
+
+; Halve EXP (50%) for non-participants
+	ldh a, [hQuotient + 1]
+	srl a
+	ldh [hQuotient + 1], a
+	ldh a, [hQuotient + 2]
+	rr a
+	ldh [hQuotient + 2], a
+	ldh a, [hQuotient + 3]
+	rr a
+	ldh [hQuotient + 3], a
+
+; Ensure at least 1 EXP is awarded
+	ldh a, [hQuotient + 1]
+	ld d, a
+	ldh a, [hQuotient + 2]
+	or d
+	ld hl, hQuotient + 3
+	or [hl]
+	jr nz, .not_bench_mon
+	inc [hl]
+.not_bench_mon
 	ldh a, [hQuotient + 3]
 	ld [wStringBuffer2 + 1], a
 	ldh a, [hQuotient + 2]
 	ld [wStringBuffer2], a
+
+	ld a, [wTempByteValue]
+	and a
+	jr z, .show_exp_text
+
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
+	jr nz, .skip_bench_exp_text
+
+.show_exp_text
 	ld a, [wCurPartyMon]
 	ld hl, wPartyMonNicknames
 	call GetNickname
@@ -7739,6 +7786,12 @@ GiveExperiencePoints:
 	push bc
 	call LoadTilemapToTempTilemap
 	pop bc
+	jr .add_exp_to_mon
+
+.skip_bench_exp_text
+	pop bc
+
+.add_exp_to_mon
 	ld hl, MON_EXP + 2
 	add hl, bc
 	ld d, [hl]
@@ -7901,6 +7954,8 @@ GiveExperiencePoints:
 	ld a, [wCurPartyMon]
 	cp b
 	jr z, .skip_exp_bar_animation
+	ld hl, wPartyMonNicknames
+	call GetNickname
 	ld de, SFX_HIT_END_OF_EXP_BAR
 	call PlaySFX
 	call WaitSFX
@@ -7968,41 +8023,19 @@ GiveExperiencePoints:
 	jp .loop
 
 .done
-	jp ResetBattleParticipants
-
-.EvenlyDivideExpAmongParticipants:
-; count number of battle participants
-	ld a, [wBattleParticipantsNotFainted]
-	ld b, a
-	ld c, PARTY_LENGTH
-	ld d, 0
-.count_loop
-	xor a
-	srl b
-	adc d
-	ld d, a
-	dec c
-	jr nz, .count_loop
+	ld de, EVENT_EXP_ALL_ACTIVE
+	ld b, CHECK_FLAG
+	call EventFlagAction
+	ld a, c
+	and a
+	jr z, .reset
+	ld a, [wPartyCount]
 	cp 2
-	ret c
-
-	ld [wTempByteValue], a
-	ld hl, wEnemyMonBaseStats
-	ld c, wEnemyMonEnd - wEnemyMonBaseStats
-.base_stat_division_loop
-	xor a
-	ldh [hDividend + 0], a
-	ld a, [hl]
-	ldh [hDividend + 1], a
-	ld a, [wTempByteValue]
-	ldh [hDivisor], a
-	ld b, 2
-	call Divide
-	ldh a, [hQuotient + 3]
-	ld [hli], a
-	dec c
-	jr nz, .base_stat_division_loop
-	ret
+	jr c, .reset
+	ld hl, Text_TeamGainedExpAll
+	call BattleTextbox
+.reset
+	jp ResetBattleParticipants
 
 BoostExp:
 ; Multiply experience by 1.5x
@@ -8041,6 +8074,10 @@ BoostedExpPointsText:
 
 ExpPointsText:
 	text_far _ExpPointsText
+	text_end
+	
+Text_TeamGainedExpAll:
+	text_far _Text_TeamGainedExpAll
 	text_end
 
 AnimateExpBar:
@@ -9783,7 +9820,6 @@ BattleStartMessage:
 	jr .PlaceBattleStartText
 
 .NotFishingInSafari
-	ld hl, PokemonFellFromTreeText
 	cp BATTLETYPE_TREE
 	ld hl, PokemonFellFromTreeText
 	cp BATTLETYPE_SAFARI_TREE

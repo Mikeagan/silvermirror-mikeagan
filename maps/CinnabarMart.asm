@@ -9,6 +9,7 @@ CinnabarMartClerkScript:
 	faceplayer
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .BallsSeven
 	ifgreater 4, .BallsFive
 	pokemart MARTTYPE_STANDARD, MART_BALLS_THREE
 	closetext
@@ -17,16 +18,25 @@ CinnabarMartClerkScript:
 	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
 	closetext
 	end
+.BallsSeven
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
+	closetext
+	end
 
 CinnabarMartMedScript:
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .MedEight
 	ifgreater 5, .MedSix
 	pokemart MARTTYPE_STANDARD, MART_MED_FOUR
 	closetext
 	end
 .MedSix
 	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	closetext
+	end
+.MedEight
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 

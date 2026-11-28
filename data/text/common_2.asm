@@ -132,6 +132,15 @@ _ExpPointsText::
 	text_decimal wStringBuffer2, 2, 5
 	text " EXP. Points!"
 	prompt
+	
+_Text_TeamGainedExpAll::
+	text "The rest of your"
+	line "team gained EXP."
+
+	para "Points thanks to"
+	line "the EXP. ALL!"
+	prompt
+
 
 _GoMonText::
 	text "Go! @"
@@ -746,6 +755,14 @@ _RegisteredItemText::
 	text_ram wStringBuffer2
 	text "."
 	prompt
+
+_UnregisteredItemText::
+	text "Unregistered the"
+	line "@"
+	text_ram wStringBuffer1
+	text "."
+	prompt
+
 
 _CantRegisterText::
 	text "You can't register"
@@ -1818,6 +1835,16 @@ _MrPsychicEggText::
 	roll "the surprise!"
 	done
 
+_MrPsychicStatExpText::
+	text "Here is your"
+	line "#MON's STAT EXP!"
+	done
+
+_MrPsychicFinishedReadingText::
+	text "Incredible!"
+	line "Truly stunning!"
+	done
+
 _MeditateWithWhichMonText::
 	ntag "MAN:"
 	text "Choose a #MON"
@@ -1831,17 +1858,16 @@ _MeditateWithWhichMonText::
 _MeditationHiddenPowerText::
 	ntag "MAN:"
 	text "Hm…"
-
 	para "Yes…"
 	line "Can you feel it?"
-
 	para "@"
-	text_ram wStringBuffer3
+	text_ram wStringBuffer1
 	text "'s hidden"
 	line "power is @"
-	text_ram wStringBuffer1
+	text_ram wStringBuffer4
 	text "!"
 	done
+	
 _ComeMeditateAgainText::
 	ntag "MAN:"
 	text "You're welcome to"

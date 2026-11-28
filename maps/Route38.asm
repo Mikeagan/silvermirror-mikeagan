@@ -24,7 +24,7 @@ Route38_ChestoBerry:
 	getitemname STRING_BUFFER_3, CHESTO_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem CHESTO_BERRY, 2
+	giveitem CHESTO_BERRY, 5
 	iffalse Route38_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE38_CHESTO_BERRY
@@ -44,7 +44,7 @@ Route38_WHTApricorn:
 	getitemname STRING_BUFFER_3, WHT_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem WHT_APRICORN
+	giveitem WHT_APRICORN, 5
 	iffalse Route38_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE38_WHT_APRICORN

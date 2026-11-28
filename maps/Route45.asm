@@ -26,7 +26,7 @@ Route45_LeppaBerry:
 	getitemname STRING_BUFFER_3, LEPPA_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem LEPPA_BERRY, 2
+	giveitem LEPPA_BERRY, 5
 	iffalse Route45_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE45_LEPPA_BERRY
@@ -46,7 +46,7 @@ Route45_LumBerry:
 	getitemname STRING_BUFFER_3, LUM_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem LUM_BERRY, 2
+	giveitem LUM_BERRY, 5
 	iffalse Route45_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE45_LUM_BERRY

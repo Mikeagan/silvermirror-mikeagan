@@ -9,6 +9,7 @@ LavenderMartClerkScript:
 	faceplayer
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .BallsSeven
 	ifgreater 4, .BallsFive
 	pokemart MARTTYPE_STANDARD, MART_BALLS_THREE
 	closetext
@@ -17,10 +18,15 @@ LavenderMartClerkScript:
 	pokemart MARTTYPE_STANDARD, MART_BALLS_FIVE
 	closetext
 	end
+.BallsSeven
+	pokemart MARTTYPE_STANDARD, MART_BALLS_SEVEN
+	closetext
+	end
 
 LavenderMartMedScript:
 	opentext
 	readvar VAR_BADGES
+	ifgreater 7, .MedEight
 	ifgreater 5, .MedSix
 	ifequal 4, .MedFour
 	pokemart MARTTYPE_STANDARD, MART_MED_TWO
@@ -32,6 +38,10 @@ LavenderMartMedScript:
 	end
 .MedSix
 	pokemart MARTTYPE_STANDARD, MART_MED_SIX
+	closetext
+	end
+.MedEight
+	pokemart MARTTYPE_STANDARD, MART_MED_EIGHT
 	closetext
 	end
 
@@ -52,8 +62,10 @@ LavenderMartCooltrainerMText:
 	line "in the mountains."
 
 	para "I thought it was"
-	line "useless, but it"
-	cont "sold for ¥5000!"
+	line "useless, so I gave"
+  para "it to my #MON,"
+	line "it got Pokerus"
+	cont "now its stronger!"
 	done
 
 LavenderMart_MapEvents:

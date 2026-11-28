@@ -24,7 +24,7 @@ Route26_LeppaBerry:
 	getitemname STRING_BUFFER_3, LEPPA_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem LEPPA_BERRY, 2
+	giveitem LEPPA_BERRY, 5
 	iffalse Route26_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE26_LEPPA_BERRY
@@ -44,7 +44,7 @@ Route26_SitrusBerry:
 	getitemname STRING_BUFFER_3, SITRUS_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem SITRUS_BERRY, 2
+	giveitem SITRUS_BERRY, 5
 	iffalse Route26_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE26_SITRUS_BERRY

@@ -5,10 +5,12 @@ Marts:
 	dw MartBallsOne
 	dw MartBallsThree
 	dw MartBallsFive
+	dw MartBallsSeven
 	dw MartMedZero
 	dw MartMedTwo
 	dw MartMedFour
 	dw MartMedSix
+	dw MartMedEight
 ;	dw MartVendingMachine
 	dw MartTMs1
 	dw MartEvolution1
@@ -64,6 +66,18 @@ MartBallsFive:
 	db SUPER_REPEL
 	db MAX_REPEL
 	db -1 ; end
+	
+MartBallsSeven:
+	db 8 ; # items
+	db POKE_BALL
+	db GREAT_BALL
+	db ULTRA_BALL
+	db MASTER_BALL
+	db ESCAPE_ROPE
+	db REPEL
+	db SUPER_REPEL
+	db MAX_REPEL
+	db -1 ; end
 
 MartMedZero:
 	db 2 ; # items
@@ -105,6 +119,23 @@ MartMedSix:
 	db BURN_HEAL
 	db ICE_HEAL
 	db -1 ; end
+	
+MartMedEight:
+	db 13 ; # items
+	db POTION
+	db SUPER_POTION
+	db HYPER_POTION
+	db MAX_POTION
+	db REVIVE
+	db MAX_REVIVE
+	db FULL_HEAL
+	db FULL_RESTORE
+	db ANTIDOTE
+	db AWAKENING
+	db PARLYZ_HEAL
+	db BURN_HEAL
+	db ICE_HEAL
+	db -1 ; end
 
 ;MartVendingMachine:
 ;	db 3 ; # items
@@ -130,25 +161,31 @@ MartTMs1:
 
 ;MartCeladon4F:
 MartEvolution1:
-	db 6 ; # items
+	db 11 ; # items
 	db POKE_DOLL
 	db FIRE_STONE
 	db THUNDERSTONE
 	db WATER_STONE
 	db LEAF_STONE
+	db SUN_STONE
+	db MOON_STONE
+	db DUSK_STONE
+	db METAL_COAT
+	db DRAGON_SCALE
 	db LINKING_CORD
 	db -1 ; end
 
 ;MartCeladon5F1:
 ;Mart Goldenrod4F:
 MartVitamins1:
-	db 5 ; # items
+	db 7 ; # items
+	db PP_UP
 	db HP_UP
 	db PROTEIN
 	db IRON
 	db CALCIUM
 	db CARBOS
-;	db PP_UP
+	db BOOSTER_CHIP
 	db -1 ; end
 
 ;MartCeladon5F2:

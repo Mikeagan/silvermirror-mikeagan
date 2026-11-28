@@ -21,7 +21,7 @@ Route33_BLKApricorn:
 	getitemname STRING_BUFFER_3, BLK_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem BLK_APRICORN
+	giveitem BLK_APRICORN, 5
 	iffalse .Route33_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE33_BLK_APRICORN

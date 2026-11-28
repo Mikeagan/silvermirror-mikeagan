@@ -30,7 +30,7 @@ VioletCity_YLWApricorn:
 	getitemname STRING_BUFFER_3, YLW_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem YLW_APRICORN
+	giveitem YLW_APRICORN, 5
 	iffalse .VioletCity_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear VIOLETCITY_YLW_APRICORN

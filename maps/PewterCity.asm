@@ -43,7 +43,7 @@ PewterCity_ChestoBerry:
 	getitemname STRING_BUFFER_3, CHESTO_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem CHESTO_BERRY, 2
+	giveitem CHESTO_BERRY, 5
 	iffalse PewterCity_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear PEWTERCITY_CHESTO_BERRY
@@ -63,7 +63,7 @@ PewterCity_PersimBerry:
 	getitemname STRING_BUFFER_3, PERSIM_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem PERSIM_BERRY, 2
+	giveitem PERSIM_BERRY, 5
 	iffalse PewterCity_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear PEWTERCITY_PERSIM_BERRY
@@ -83,7 +83,7 @@ PewterCity_BLUApricorn:
 	getitemname STRING_BUFFER_3, BLU_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem BLU_APRICORN
+	giveitem BLU_APRICORN, 5
 	iffalse PewterCity_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear PEWTERCITY_BLU_APRICORN
@@ -102,7 +102,7 @@ PewterCity_WHTApricorn:
 	getitemname STRING_BUFFER_3, WHT_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem WHT_APRICORN
+	giveitem WHT_APRICORN, 5
 	iffalse PewterCity_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear PEWTERCITY_WHT_APRICORN

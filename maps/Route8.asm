@@ -23,7 +23,7 @@ Route8_RawstBerry:
 	getitemname STRING_BUFFER_3, RAWST_BERRY
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem RAWST_BERRY, 2
+	giveitem RAWST_BERRY, 5
 	iffalse Route8_NoRoomInBag
 	farwritetext _PickedBerriesText
 	disappear ROUTE8_RAWST_BERRY
@@ -43,7 +43,7 @@ Route8_YLWApricorn:
 	getitemname STRING_BUFFER_3, YLW_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem YLW_APRICORN
+	giveitem YLW_APRICORN,5
 	iffalse Route8_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE8_YLW_APRICORN

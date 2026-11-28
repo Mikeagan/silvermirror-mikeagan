@@ -35,7 +35,7 @@ Route37_REDApricorn:
 	getitemname STRING_BUFFER_3, RED_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem RED_APRICORN
+	giveitem RED_APRICORN, 5
 	iffalse Route37_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE37_RED_APRICORN
@@ -54,7 +54,7 @@ Route37_BLUApricorn:
 	getitemname STRING_BUFFER_3, BLU_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem BLU_APRICORN
+	giveitem BLU_APRICORN, 5
 	iffalse Route37_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE37_BLU_APRICORN
@@ -73,7 +73,7 @@ Route37_BLKApricorn:
 	getitemname STRING_BUFFER_3, BLK_APRICORN
 	farwritetext _HeyItsFruitText
 	promptbutton
-	giveitem BLK_APRICORN
+	giveitem BLK_APRICORN, 5
 	iffalse Route37_NoRoomInBag
 	farwritetext _PickedApricornText
 	disappear ROUTE37_BLK_APRICORN

@@ -202,8 +202,9 @@ _MobileBattleRemainingTimeText::
 	done
 
 _WouldYouLikeToSaveTheGameText::
-	text "Would you like to"
-	line "save the game?"
+	ntag "S.MIRROR:{SM_GAME_VERSION}"
+	text "MIKEAGAN:{GAME_VERSION}"
+	line "Save the game?"
 	done
 
 _SavedTheGameText::
@@ -1345,7 +1346,7 @@ _PPIsMaxedOutText::
 _PPsIncreasedText::
 	text_ram wStringBuffer2
 	text "'s PP"
-	line "increased."
+	line "maxed out!"
 	prompt
 
 _PPRestoredText::

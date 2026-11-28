@@ -18,6 +18,7 @@ gfx/pokemon/*/frames.asm
 *.gbc
 *.gb
 *.patch
+*.bps
 
 # rgbds extras
 *.map

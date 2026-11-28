@@ -22,7 +22,7 @@ HealParty:
 .done
 	ret
 
-HealPartyMon:
+HealPartyMon::
 	ld a, MON_SPECIES
 	call GetPartyParamLocation
 	ld d, h
@@ -107,4 +107,96 @@ AnimateHPBar:
 	call WaitBGMap
 	call _AnimateHPBar
 	call WaitBGMap
+	ret
+	
+DropWildMonHeldItem::
+	; Only trigger in wild battles (wBattleMode == 1)
+	ld a, [wBattleMode]
+	dec a
+	ret nz
+
+	; Check if the wild Pokémon is holding an item
+	ld a, [wEnemyMonItem]
+	and a
+	ret z
+
+	; Load item ID and quantity (1) into wCurItem / wItemQuantityChange
+	ld [wCurItem], a
+	ld [wNamedObjectIndex], a
+	ld a, 1
+	ld [wItemQuantityChange], a
+
+	; Try to place the item into the player's bag
+	ld hl, wNumItems
+	call ReceiveItem
+	ret nc
+
+	; Clear wEnemyMonItem so it can't be dropped again
+	xor a
+	ld [wEnemyMonItem], a
+
+	; Load item name into wStringBuffer1 and print message
+	call GetItemName
+	call CopyName1
+	ld de, SFX_ITEM
+	call PlaySFX
+	call WaitSFX
+	ld hl, WildMonDroppedItemText
+	jp StdBattleTextbox
+
+WildMonDroppedItemText:
+	text "<PLAYER> found"
+	line "@"
+	text_ram wStringBuffer1
+	text "!"
+	prompt
+
+CheckNuggetPokerusOnBattleStart::
+	ld a, [wPartyCount]
+	and a
+	ret z
+
+	ld b, a ; loop counter
+	ld c, 0 ; party index
+.loop
+	push bc
+
+	; Skip Eggs
+	ld d, 0
+	ld e, c
+	ld hl, wPartySpecies
+	add hl, de
+	ld a, [hl]
+	cp EGG
+	jr z, .next
+
+	; Check held item
+	ld a, c
+	ld hl, wPartyMon1Item
+	ld bc, PARTYMON_STRUCT_LENGTH
+	call AddNTimes
+	ld a, [hl]
+	cp NUGGET
+	jr nz, .next
+
+	; Check Pokérus byte (skip if currently infected or cured)
+	ld bc, MON_POKERUS - MON_ITEM
+	add hl, bc
+	ld a, [hl]
+	and a
+	jr nz, .next
+
+	; 10% chance (change to 1 percent or 5 percent if desired)
+	call Random
+	cp 10 percent
+	jr nc, .next
+
+	; Infect with Strain 1, 3 days duration
+	ld [hl], $13
+
+.next
+	pop bc
+	inc c
+	dec b
+	jr nz, .loop
 	ret

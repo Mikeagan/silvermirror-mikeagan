@@ -855,7 +855,7 @@ GetMonTypeIndex:
 
 
 GetStatusConditionIndex:
-; de points to status condition bytes of a pokemon from a party_struct or battle_struct
+; 'de' points to status condition bytes of a pokemon from a party_struct or battle_struct
 ; return the status condition index in 'a', and also 'd' for those who farcall
 	push de
 	inc de
@@ -897,3 +897,55 @@ GetStatusConditionIndex:
 	inc a ; 1
 	ld d, a
 	ret
+
+PrintTempMonStatExp::
+	; Set up a wide text box frame to fit labels, numbers, and caps cleanly
+	; hl = top-left tile coordinate (X, Y)
+	; b = height (rows), c = width (columns)
+	hlcoord 0, 1
+	lb bc, 11, 20
+	call Textbox
+	
+	; Place the Stat Labels and Max Caps on the screen
+	hlcoord 1, 2
+	ld de, .StatExpLabelsText
+	call PlaceString
+
+	; Print HP Exp (2 bytes)
+	hlcoord 9, 2;3        ; Position coordinates adjusted for tight screen width
+	ld de, wTempMonStatExp
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 5 ; 2 bytes input, 5 max digits printed
+	call PrintNum
+
+	; Print Attack Exp (2 bytes)
+	hlcoord 9, 4;5
+	ld de, wTempMonStatExp + 2
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
+	call PrintNum
+
+	; Print Defense Exp (2 bytes)
+	hlcoord 9, 6;7
+	ld de, wTempMonStatExp + 4
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
+	call PrintNum
+
+	; Print Speed Exp (2 bytes)
+	hlcoord 9, 8;9
+	ld de, wTempMonStatExp + 6
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
+	call PrintNum
+
+	; Print Special Exp (2 bytes)
+	hlcoord 9, 10;11
+	ld de, wTempMonStatExp + 8
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 5
+	call PrintNum
+
+	ret
+
+.StatExpLabelsText:
+	db   "HP  EXP:     /65535"
+	next "ATK EXP:     /65535"
+	next "DEF EXP:     /65535"
+	next "SPD EXP:     /65535"
+	next "SPC EXP:     /65535@"

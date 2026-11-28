@@ -36,6 +36,13 @@ MainMenu:
 	call MainMenu_GetWhichMenu
 	ld [wWhichIndexSet], a
 	call MainMenu_PrintCurrentTimeAndDay
+	hlcoord 1, 12 ; 2 rows above the clock box
+	ld de, MainMenuSMVersionString
+	call PlaceString
+	hlcoord 1, 13 ; 1 row above the clock box
+	ld de, MainMenuModVersionString
+	call PlaceString
+	call PlaceString
 	ld hl, .MenuHeader
 	call LoadMenuHeader
 	call MainMenuJoypadLoop
@@ -379,3 +386,12 @@ MainMenu_Continue:
 MainMenu_MysteryGift:
 	farcall MysteryGift
 	ret
+
+MainMenuForkAuthorString:
+	db "MOD BY MIKEAGAN@" ; Replace MICHAEL with your handle/fork name (max 18 chars)
+
+MainMenuSMVersionString:
+	db "S.MIRROR:{SM_GAME_VERSION}@"
+
+MainMenuModVersionString:
+	db "MIKEAGAN:{GAME_VERSION}@"

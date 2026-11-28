@@ -2,6 +2,13 @@ roms := \
 	silvermirror.gbc \
 	silvermirror_debug.gbc
 patches := silvermirror.patch
+SM_VER := $(shell sed -n 's/.*SM_GAME_VERSION.*\\" *\([^\\"]*\) *\\".*/\1/p' version.asm)
+MOD_VER := $(shell sed -n '/SM_/!s/.*GAME_VERSION.*\\" *\([^\\"]*\) *\\".*/\1/p' version.asm)
+BASE_ROM_10  := baserom_crystal10.gbc
+BASE_ROM_11  := baserom_crystal11.gbc
+NAMED_ROM    := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER).gbc
+NAMED_BPS_11 := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER) (v1.1).bps
+NAMED_BPS_10 := Pokemon Silver Mirror $(SM_VER).M.$(MOD_VER) (v1.0).bps
 
 rom_obj := \
 	audio.o \
@@ -46,7 +53,7 @@ RGBLINK ?= $(RGBDS)rgblink
 ### Build targets
 
 .SUFFIXES:
-.PHONY: all silvermirror debug clean tidy compare tools
+.PHONY: all silvermirror debug clean tidy compare tools bump upstream
 .SECONDEXPANSION:
 .PRECIOUS:
 .SECONDARY:
@@ -85,6 +92,7 @@ tidy:
 	      $(silvermirror_vc_obj) \
 	      $(silvermirror_debug_obj) \
 	      rgbdscheck.o
+	rm -f "Pokemon Silver Mirror "*.gbc "Pokemon Silver Mirror "*.bps
 	$(MAKE) clean -C tools/
 
 compare: $(roms) $(patches)
@@ -93,6 +101,27 @@ compare: $(roms) $(patches)
 tools:
 	$(MAKE) -C tools/
 
+bump:
+	@awk -F'\\"' '/DEF GAME_VERSION/ && !/SM_GAME_VERSION/ { \
+		new_ver = $$2 + 1; \
+		print "DEF GAME_VERSION    EQUS \"\\\"" new_ver "\\\"\""; \
+		next \
+	} { print }' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
+	@grep "DEF GAME_VERSION" version.asm
+	$(MAKE)
+
+upstream:
+	@if [ -z "$(VER)" ]; then \
+		echo "Usage: make upstream VER=1.3.0"; \
+		exit 1; \
+	fi
+	@awk -v ver="$(VER)" ' \
+		/DEF SM_GAME_VERSION/ { print "DEF SM_GAME_VERSION EQUS \"\\\"" ver "\\\"\""; next } \
+		/DEF GAME_VERSION/    { print "DEF GAME_VERSION    EQUS \"\\\"1\\\"\""; next } \
+		{ print } \
+	' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
+	@grep -E "GAME_VERSION" version.asm
+	$(MAKE)
 
 RGBASMFLAGS = -hL -Q8 -P includes.asm -Weverything -Wnumeric-string=2 -Wtruncation=1
 # Create a sym/map for debug purposes if `make` run with `DEBUG=1`
@@ -112,7 +141,7 @@ rgbdscheck.o: rgbdscheck.asm
 
 # Build tools when building the rom.
 # This has to happen before the rules are processed, since that's when scan_includes is run.
-ifeq (,$(filter clean tidy tools,$(MAKECMDGOALS)))
+ifeq (,$(filter clean tidy tools bump upstream,$(MAKECMDGOALS)))
 
 $(info $(shell $(MAKE) -C tools))
 
@@ -145,6 +174,20 @@ silvermirror_vc_opt    = -Cjv -t PM_CRYSTAL -i BYTE -n 1 -k 01 -l 0x33 -m 0x10 -
 	$(RGBLINK) -n $*.sym -m $*.map -l layout.link -o $@ $(filter %.o,$^)
 	$(RGBFIX) $($*_opt) $@
 	tools/stadium $@
+	@if [ "$@" = "silvermirror.gbc" ]; then \
+		cp "$@" "$(NAMED_ROM)"; \
+		if [ -f "$(BASE_ROM_11)" ]; then \
+			tools/flips.exe --create --bps "$(BASE_ROM_11)" "$@" "$(NAMED_BPS_11)"; \
+		else \
+			echo "Skipping v1.1 BPS patch ($(BASE_ROM_11) not found)"; \
+		fi; \
+		if [ -f "$(BASE_ROM_10)" ]; then \
+			tools/flips.exe --create --bps "$(BASE_ROM_10)" "$@" "$(NAMED_BPS_10)"; \
+		else \
+			echo "Skipping v1.0 BPS patch ($(BASE_ROM_10) not found)"; \
+		fi; \
+	fi
+
 
 
 ### LZ compression rules
