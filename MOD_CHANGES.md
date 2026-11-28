@@ -10,7 +10,7 @@ A comprehensive list of custom quality-of-life improvements, item adjustments, P
 * **Dual Registered Key Items:** Assign two key items simultaneously from the Pack menu—**Tap `SELECT`** (`TAP.SEL`) to use the primary item, or **Hold `SELECT`** (`HOLD.SEL`) to use the secondary item.
 * **Upgraded Itemfinder:** When detecting a hidden item nearby, the player automatically turns toward the item's direction. If standing directly on top of the hidden item, the player spins in place.
 * **EXP Boost Option:** Added an **EXP Boost (`ON`/`OFF`)** toggle in the in-game Options menu to double battle experience points on demand.
-* **In-Game Version Display:** Current base and mod versions (`SM:1.2.1 M:8`) are displayed on both the Title/Main Menu and the Save confirmation prompt.
+* **In-Game Version Display:** Current base and mod versions (`S. MIRROR:1.2.1 MIKEAGAN:8`) are displayed on both the Title/Main Menu and the Save confirmation prompt.
 * **Fast Berry & Apricorn Respawns:** Removed the midnight daily reset lock so trees replenish without waiting for the clock rollover.
 * **Pokémon Center Healing:** The player automatically turns downward away from Nurse Joy after healing.
 
