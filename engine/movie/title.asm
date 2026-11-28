@@ -199,7 +199,7 @@ _TitleScreen:
 	add hl, bc
 	dec e
 	jr nz, .loopfill
-
+	
 ; Back to VRAM bank 0
 	ld a, 0
 	ldh [rVBK], a
@@ -260,6 +260,59 @@ _TitleScreen:
 	ld e, 16
 	call DrawTitleGraphic
 
+; Copy "M", ".", and "0"-"9" 1bpp tiles directly into VRAM Bank 1 vTiles2 $70-$7B ($9700-$97B0)
+	ld a, 1
+	ldh [rVBK], a
+
+	; Set palette 7 + VRAM Bank 1 attribute directly in VRAM BG Map 0 at (1, 1)
+	hlbgcoord 1, 1
+	ld bc, 6
+	ld a, 7 | VRAM_BANK_1
+	call ByteFill
+
+	; Expand 12 1bpp glyphs (96 bytes) directly into 2bpp VRAM at vTiles2 tile $70
+	ld hl, TitleModVersionFont
+	ld de, vTiles2 tile $70
+	ld c, 12 * 8
+.copy_mod_font
+	ld a, [hli]
+	ld [de], a
+	inc de
+	ld [de], a
+	inc de
+	dec c
+	jr nz, .copy_mod_font
+
+	; Back to VRAM Bank 0
+	xor a
+	ldh [rVBK], a
+
+; Draw Mod Version at top-left (hlcoord 1, 1) using tile IDs $70 ("M"), $71 ("."), $72+digit ("0"-"9")
+	hlcoord 1, 1
+	ld de, TitleModVersionString
+.draw_mod_ver
+	ld a, [de]
+	and a
+	jr z, .done_mod_ver
+	cp "M"
+	jr nz, .not_m
+	ld a, $70
+	jr .put_tile
+.not_m
+	cp "."
+	jr nz, .is_digit
+	ld a, $71
+	jr .put_tile
+.is_digit
+	sub "0"
+	add $72
+.put_tile
+	ld [hli], a
+	inc de
+	jr .draw_mod_ver
+.done_mod_ver
+
+	
 ; Initialize running Suicune?
 	ld d, $0
 	call LoadSuicuneFrame
@@ -504,6 +557,119 @@ endr
 	jr nz, .loop
 
 	ret
+
+TitleModVersionString:
+	db "M.{GAME_VERSION}", 0
+
+TitleModVersionFont:
+	; $70: 'M'
+	db %11000110
+	db %11101110
+	db %11111110
+	db %11010110
+	db %11000110
+	db %11000110
+	db %11000110
+	db %00000000
+	; $71: '.'
+	db %00000000
+	db %00000000
+	db %00000000
+	db %00000000
+	db %00000000
+	db %01100000
+	db %01100000
+	db %00000000
+	; $72: '0'
+	db %01111100
+	db %11000110
+	db %11001110
+	db %11010110
+	db %11100110
+	db %11000110
+	db %01111100
+	db %00000000
+	; $73: '1'
+	db %00011000
+	db %00111000
+	db %01111000
+	db %00011000
+	db %00011000
+	db %00011000
+	db %01111110
+	db %00000000
+	; $74: '2'
+	db %01111100
+	db %11000110
+	db %00000110
+	db %00011100
+	db %01110000
+	db %11000000
+	db %11111110
+	db %00000000
+	; $75: '3'
+	db %01111100
+	db %11000110
+	db %00000110
+	db %00111100
+	db %00000110
+	db %11000110
+	db %01111100
+	db %00000000
+	; $76: '4'
+	db %00001110
+	db %00011110
+	db %00110110
+	db %01100110
+	db %11111110
+	db %00000110
+	db %00000110
+	db %00000000
+	; $77: '5'
+	db %11111110
+	db %11000000
+	db %11111100
+	db %00000110
+	db %00000110
+	db %11000110
+	db %01111100
+	db %00000000
+	; $78: '6'
+	db %00111100
+	db %01100000
+	db %11000000
+	db %11111100
+	db %11000110
+	db %11000110
+	db %01111100
+	db %00000000
+	; $79: '7'
+	db %11111110
+	db %11000110
+	db %00001100
+	db %00011000
+	db %00110000
+	db %00110000
+	db %00110000
+	db %00000000
+	; $7A: '8'
+	db %01111100
+	db %11000110
+	db %11000110
+	db %01111100
+	db %11000110
+	db %11000110
+	db %01111100
+	db %00000000
+	; $7B: '9'
+	db %01111100
+	db %11000110
+	db %11000110
+	db %01111110
+	db %00000110
+	db %00001100
+	db %01111000
+	db %00000000
 
 TitleNoStarterGFX:
 INCBIN "gfx/title/title_nostarter.2bpp.lz"

@@ -111,16 +111,30 @@ bump:
 	' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
 	@SM_V=$$(sed -n 's/.*SM_GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
 	MOD_V=$$(sed -n '/SM_/!s/.*GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
-	if [ -f MOD_CHANGES.md ]; then \
+	TODAY=$$(date +%Y-%m-%d); \
+	if [ -f README_MOD.md ]; then \
 		awk -v sm="$$SM_V" -v mod="$$MOD_V" ' \
 			/^\*\*Base Version:\*\*/ { \
 				print "**Base Version:** SM " sm " | **Mod Version:** " mod; \
 				next \
 			} { print } \
-		' MOD_CHANGES.md > MOD_CHANGES.md.tmp && mv MOD_CHANGES.md.tmp MOD_CHANGES.md; \
+		' README_MOD.md > README_MOD.md.tmp && mv README_MOD.md.tmp README_MOD.md; \
+	fi; \
+	if [ -f CHANGELOG_MOD.md ]; then \
+		awk -v sm="$$SM_V" -v mod="$$MOD_V" -v dt="$$TODAY" ' \
+			/^---$$/ && !done { \
+				print; \
+				print ""; \
+				print "### Mod Version " mod " (Base: SM " sm ") — " dt; \
+				print "* "; \
+				done = 1; \
+				next \
+			} { print } \
+		' CHANGELOG_MOD.md > CHANGELOG_MOD.md.tmp && mv CHANGELOG_MOD.md.tmp CHANGELOG_MOD.md; \
 	fi
 	@cat version.asm
 	$(MAKE)
+
 
 upstream:
 	@if [ -z "$(VER)" ]; then \
@@ -133,13 +147,13 @@ upstream:
 	' version.asm > version.asm.tmp && mv version.asm.tmp version.asm
 	@SM_V=$$(sed -n 's/.*SM_GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
 	MOD_V=$$(sed -n '/SM_/!s/.*GAME_VERSION.*"\([^"]*\)".*/\1/p' version.asm); \
-	if [ -f MOD_CHANGES.md ]; then \
+	if [ -f README_MOD.md ]; then \
 		awk -v sm="$$SM_V" -v mod="$$MOD_V" ' \
 			/^\*\*Base Version:\*\*/ { \
 				print "**Base Version:** SM " sm " | **Mod Version:** " mod; \
 				next \
 			} { print } \
-		' MOD_CHANGES.md > MOD_CHANGES.md.tmp && mv MOD_CHANGES.md.tmp MOD_CHANGES.md; \
+		' README_MOD.md > README_MOD.md.tmp && mv README_MOD.md.tmp README_MOD.md; \
 	fi
 	@cat version.asm
 	$(MAKE)
