@@ -1,3 +1,5 @@
+> **Looking for the custom ROM hack features?** View the full **[Mod Changelog (MOD_CHANGES.md)](./MOD_CHANGES.md)**.
+
 # Pokémon: Silver Mirror
 
 This is a custom Pokémon game based on the Pokémon Crystal disassembly.  
